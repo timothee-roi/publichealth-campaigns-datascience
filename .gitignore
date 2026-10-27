@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+.env
+.DS_Store
+
+# Raw and regenerated data (large or re-downloadable)
+data/raw/
+data/processed/daily_recollected/
+data/processed/medicam/
+data/processed/queries/mc_stories_*.csv

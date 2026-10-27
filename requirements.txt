@@ -1,0 +1,19 @@
+# Analysis (notebooks 02-03)
+numpy>=1.24
+pandas>=2.0
+scipy>=1.10
+statsmodels>=0.14
+matplotlib>=3.7
+scikit-learn>=1.3
+jupyterlab>=4.0
+
+# Data collection (notebook 01)
+pytrends>=4.9
+mediacloud>=4.0
+newspaper4k>=0.9
+lxml_html_clean
+
+# Medic'AM (notebook 04)
+requests>=2.31
+xlrd>=2.0        # .xls files
+openpyxl>=3.1    # .xlsx files
