@@ -18,13 +18,10 @@ DATA_PROCESSED = ROOT / "data" / "processed"
 DAILY_DIR = DATA_PROCESSED / "daily"          # inputs of the Granger analysis
 MONTHLY_DIR = DATA_PROCESSED / "monthly"      # long-run GT / MC series
 QUERY_DIR = DATA_PROCESSED / "queries"        # snowball terms, k-grams
-MEDICAM_RAW = DATA_RAW / "medicam"            # Medic'AM .xls files
-MEDICAM_DIR = DATA_PROCESSED / "medicam"
 FIG_DIR = ROOT / "results" / "figures"
 TAB_DIR = ROOT / "results" / "tables"
 
-for _d in (DATA_RAW, DAILY_DIR, MONTHLY_DIR, QUERY_DIR, MEDICAM_RAW,
-           MEDICAM_DIR, FIG_DIR, TAB_DIR):
+for _d in (DATA_RAW, DAILY_DIR, MONTHLY_DIR, QUERY_DIR, FIG_DIR, TAB_DIR):
     _d.mkdir(parents=True, exist_ok=True)
 
 # ---------------------------------------------------------------------------

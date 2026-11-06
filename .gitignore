@@ -8,5 +8,4 @@ __pycache__/
 # Raw and regenerated data (large or re-downloadable)
 data/raw/
 data/processed/daily_recollected/
-data/processed/medicam/
 data/processed/queries/mc_stories_*.csv

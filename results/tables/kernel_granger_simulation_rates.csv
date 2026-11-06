@@ -1,0 +1,9 @@
+scenario,direction,truth,Linear Granger (paper test),Linear Granger (surrogates),KGC (SE kernel) (paper test),KGC (SE kernel) (surrogates),lsNGC (paper test),lsNGC (surrogates)
+Nonlinear MC → GT,MC → GT,True,0.08333333333333333,0.16666666666666666,1.0,1.0,1.0,1.0
+Nonlinear MC → GT,GT → MC,False,0.08333333333333333,0.08333333333333333,0.0,0.08333333333333333,0.0,0.0
+Independent,MC → GT,False,0.08333333333333333,0.0,0.0,0.08333333333333333,0.0,0.0
+Independent,GT → MC,False,0.0,0.0,0.0,0.0,0.0,0.0
+"Common driver, fixed timing",MC → GT,False,1.0,0.0,0.9166666666666666,0.0,1.0,0.0
+"Common driver, fixed timing",GT → MC,False,1.0,0.08333333333333333,0.5,0.0,0.75,0.08333333333333333
+"Common driver, timing varies",MC → GT,False,1.0,0.9166666666666666,1.0,0.8333333333333334,1.0,0.9166666666666666
+"Common driver, timing varies",GT → MC,False,1.0,0.5,0.5833333333333334,0.25,0.6666666666666666,0.25

@@ -1,0 +1,41 @@
+campaign,direction,m,kgc_se,lsngc
+Dry January,MC → GT,1,0.025,0.1
+Dry January,MC → GT,2,0.175,0.1
+Dry January,MC → GT,3,0.575,0.225
+Dry January,MC → GT,5,0.875,0.6
+Dry January,MC → GT,7,0.95,0.425
+Dry January,GT → MC,1,0.05,0.1
+Dry January,GT → MC,2,0.05,0.15
+Dry January,GT → MC,3,0.125,0.2
+Dry January,GT → MC,5,0.375,0.275
+Dry January,GT → MC,7,0.35,0.1
+Mars Bleu,MC → GT,1,0.825,0.75
+Mars Bleu,MC → GT,2,0.85,1.0
+Mars Bleu,MC → GT,3,0.8,0.9
+Mars Bleu,MC → GT,5,0.475,0.875
+Mars Bleu,MC → GT,7,0.425,0.825
+Mars Bleu,GT → MC,1,0.325,0.075
+Mars Bleu,GT → MC,2,0.525,0.45
+Mars Bleu,GT → MC,3,0.05,0.15
+Mars Bleu,GT → MC,5,0.45,0.675
+Mars Bleu,GT → MC,7,0.325,0.025
+Movember,MC → GT,1,0.075,0.025
+Movember,MC → GT,2,0.3,0.025
+Movember,MC → GT,3,0.05,0.025
+Movember,MC → GT,5,0.025,0.025
+Movember,MC → GT,7,0.025,0.025
+Movember,GT → MC,1,0.05,0.025
+Movember,GT → MC,2,0.075,0.025
+Movember,GT → MC,3,0.175,0.05
+Movember,GT → MC,5,0.375,0.025
+Movember,GT → MC,7,0.85,0.05
+Octobre Rose,MC → GT,1,0.75,0.175
+Octobre Rose,MC → GT,2,0.75,1.0
+Octobre Rose,MC → GT,3,0.75,1.0
+Octobre Rose,MC → GT,5,0.65,0.95
+Octobre Rose,MC → GT,7,0.7,0.575
+Octobre Rose,GT → MC,1,0.5,0.775
+Octobre Rose,GT → MC,2,0.05,0.925
+Octobre Rose,GT → MC,3,0.125,0.625
+Octobre Rose,GT → MC,5,0.75,0.9
+Octobre Rose,GT → MC,7,0.95,0.775
