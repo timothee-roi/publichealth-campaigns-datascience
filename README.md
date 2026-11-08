@@ -1,38 +1,47 @@
-# Public health campaigns, media coverage and search interest
+# Media coverage and search interest during French health awareness campaigns
 
-Code for the project *Measuring the Impact of Public Health Campaigns on Public
-Attention: Google Trends and MediaCloud*, by Timothée Roina, supervised by
-Marie-Laure Charpignon.
+Code and data for the report *Media Coverage and Online Search Interest during French
+Health Awareness Campaigns: A Granger Analysis Robust to the Campaign Calendar*, by
+Timothée Roina, supervised by Marie-Laure Charpignon.
 
-The project studies four recurring French awareness campaigns (Octobre Rose,
-Movember, Mars Bleu and Dry January). It uses Google Trends (GT) as a proxy for
-public interest and MediaCloud (MC) as a measure of press coverage. It compares the
-timing of media and search peaks, then tests linear and nonlinear (kernel) Granger
-causality between the two series on daily windows around each yearly campaign.
+The project studies four recurring French awareness campaigns (Octobre Rose, Movember,
+Mars Bleu and Dry January) over eleven seasons (2015–2025). Google Trends (GT) serves as
+a proxy for public information-seeking and MediaCloud (MC) article volume as a measure of
+media salience. The analysis:
+
+* compares the timing of media and search peaks;
+* tests linear and nonlinear (kernel) Granger causality in both directions on daily
+  campaign windows, with lags kept within each season;
+* tests every link against season-swap surrogates, because the campaign calendar drives
+  both series;
+* validates every test on simulated systems with a known causal structure.
 
 ## Notebooks
 
-| Notebook | Content | Runs offline |
-|---|---|---|
-| [`01_query_building_and_data_collection`](notebooks/01_query_building_and_data_collection.ipynb) | GT snowball query discovery, MC article texts and k-grams, monthly series 2015–2025, daily seasonal windows | no (APIs) |
-| [`02_visualisation_and_peak_timing`](notebooks/02_visualisation_and_peak_timing.ipynb) | Figures 1–3, 9–10 and Table 1 (lag between MC and GT peaks) | yes* |
-| [`03_granger_analysis`](notebooks/03_granger_analysis.ipynb) | Stationarity tests, AIC lag selection, Granger F-tests, LOYO robustness, coefficients, sensitivity analyses (Table 2, Figures 4–8, 11–12) | yes |
-| [`04_nonlinear_kernel_granger`](notebooks/04_nonlinear_kernel_granger.ipynb) | Nonlinear Granger causality (KGC with kernels, lsNGC), season-swap surrogate tests, validation on simulated data | yes** |
+| Notebook | Content | Report | Runs offline |
+|---|---|---|---|
+| [`01_query_building_and_data_collection`](notebooks/01_query_building_and_data_collection.ipynb) | GT snowball query discovery, MC article texts and k-grams, monthly series, daily campaign windows | §2 | no (APIs) |
+| [`02_visualisation_and_peak_timing`](notebooks/02_visualisation_and_peak_timing.ipynb) | Daily windows, seasons aligned on the GT peak, lag between MC and GT peaks | Figs. 2–4, Table 1 | yes |
+| [`03_granger_analysis`](notebooks/03_granger_analysis.ipynb) | Linear Granger causality with within-season lags: AIC lag selection, F-tests, LOYO, coefficients, jackknife intervals, impulse responses with bootstrap bands, sensitivity to the specification | Table 2, Figs. 5–10, 14–15, App. B–C | yes |
+| [`04_nonlinear_kernel_granger`](notebooks/04_nonlinear_kernel_granger.ipynb) | Nonlinear Granger causality (KGC, lsNGC), season-swap surrogates, validation on 100 simulated datasets per scenario, jackknife intervals, robustness to the k-means initialisation | Table 3, Fig. 11, Figs. 16–22 (App. E) | yes* |
+| [`05_report_figures`](notebooks/05_report_figures.ipynb) | Monthly GT vs MC series, snowball rounds, top k-grams, drawn from your data files | Figs. 1, 12, 13 | yes** |
 
-\* Figures 1, 9 and 10 need the outputs of notebook 01; the other outputs use the
-daily data included in `data/processed/daily/`.
-
-\*\* A full run takes about 30 minutes on two cores. Results are cached in
+\* A full run takes about 2–3 hours on two cores. Results are cached in
 `results/cache/kernel_granger.joblib`, so the notebook reopens in seconds; set
 `RECOMPUTE = True` to recompute everything.
+
+\*\* Needs the monthly series, snowball rounds and k-grams in `data/raw/figures_input/`.
+These files are produced by notebook 01 or by the original collection notebooks, and
+are not included here. The notebook accepts both formats; see its first cell.
 
 The shared code is in `src/phc/`:
 
 * `config.py`: paths, campaigns, seasonal windows and queries;
 * `collect.py`: Google Trends and MediaCloud collection, k-grams;
-* `granger.py`: lag matrices, AIC grid, F-test, LOYO, coefficients, stationarity;
+* `granger.py`: lag matrices, AIC grid, F-test, LOYO, coefficients, stationarity,
+  season bootstrap, impulse responses;
 * `kernel_granger.py`: KGC and lsNGC (used in notebook 04), KPCR and GPSIC (implemented,
-  not used), within-season lag design, season-swap surrogates;
+  not used), within-season lag design, season-swap surrogates, jackknife;
 * `simulate.py`: simulated seasonal systems with a known causal structure.
 
 ## Getting started
@@ -45,15 +54,15 @@ pip install -r requirements.txt
 jupyter lab notebooks/
 ```
 
-Notebooks 02, 03 and 04 run as is. For notebook 01, get a MediaCloud API key at
-<https://search.mediacloud.org> and set it before starting Jupyter
-(`export MEDIACLOUD_API_KEY="..."`). Then turn on the sections you need in the `RUN`
+Notebooks 02, 03 and 04 run as is on the included data. For notebook 01, get a
+MediaCloud API key at <https://search.mediacloud.org> and set it before starting Jupyter
+(`export MEDIACLOUD_API_KEY="..."`), then turn on the sections you need in the `RUN`
 dictionary. Google Trends is accessed with `pytrends`, an unofficial client that Google
 rate-limits heavily, so collection is slow.
 
 ## Data
 
-`data/processed/daily/` contains the daily series used in the paper: one window per
+`data/processed/daily/` contains the daily series used in the report: one window per
 campaign and year, 2015–2025, 11 seasons per campaign.
 
 | Campaign | Window | Days per season |
@@ -64,61 +73,30 @@ campaign and year, 2015–2025, 11 seasons per campaign.
 | Dry January | 26 Dec – 6 Feb | 43 |
 
 * `GT_<code>_Granger.csv`: Google Trends daily interest (`campaign_index`, 0–100,
-  100 = maximum day of the season). The query used is stored in the `query` column.
+  100 = busiest day of the season). The query is stored in the `query` column.
 * `MC_<code>_Granger_normalized.csv`: MediaCloud daily article counts divided by their
-  seasonal maximum, × 100 (`n_articles`).
+  seasonal maximum, × 100 (`n_articles`). These files do not record the query used.
 
 Codes: `OR` Octobre Rose, `Mov` Movember, `MB` Mars Bleu, `DJ` Dry January.
 
-## What the re-analysis confirms and corrects
+## Main results
 
-Notebook 03 recomputes the paper's results from the included data.
-
-* **Confirmed:** the selected lags, the adjusted R² of reduced and full models, and the
-  LOYO counts of Table 2. Table 1 (peak lags) is also confirmed exactly.
-* **To correct in the paper:** two p-values of Table 2 are much smaller than printed.
-  Movember GT → MC is 3.6 × 10⁻⁸, not 1.0 × 10⁻⁴. Octobre Rose GT → MC is
-  4.9 × 10⁻¹¹, not 3.0 × 10⁻⁴. `statsmodels` gives the same values. Both tests were
-  already significant, so no conclusion changes.
-* **Queries:** the Google Trends queries stored in the daily files (and in `config.py`)
-  differ from those listed in Appendix A of the paper for the four campaigns. For
-  example, Octobre Rose uses "Octobre rose + cancer du sein + mammographie + dépistage
-  cancer du sein + cancer du sein symptôme". Appendix A should match the files. The
-  MediaCloud files do not record their query; `config.py` uses the MC terms of
-  Appendix A.
-* **Sensitivity analyses (new):**
-  * When every lag pair is fitted on the same days, no selected lag order stays at the
-    bound of 20, and all tests remain significant.
-  * When lags are also kept within a single season, Dry January GT → MC (p = 0.27) and
-    Mars Bleu MC → GT (p = 0.42) are no longer significant. Octobre Rose and Movember
-    remain significant in both directions under every variant.
-
-## Nonlinear Granger causality (notebook 04)
-
-The methods are the two constraint-based approaches reviewed and unified by Murphy &
-Benavoli (2026), *Constraint- and Score-Based Nonlinear Granger Causality Discovery with
-Kernels*, arXiv:2601.09579:
-
-* **KGC**, kernel Granger causality (Marinazzo, Pellicoro & Stramaglia, 2008), with a
-  squared-exponential kernel, and with a linear kernel as a reference;
-* **lsNGC**, large-scale nonlinear Granger causality (Wismüller et al., 2021).
-
-These tests assume that no unobserved variable drives both series, but the campaign
-calendar does. The notebook therefore adds season-swap surrogates (the cause series of
-each season is replaced by that of another season) and keeps lags within a season. It
-validates every test on simulated data with a known truth before applying it.
-
-**Results.**
-
-* On simulated data, KGC and lsNGC detect a purely nonlinear link that linear Granger
-  causality misses (12/12 vs 1–2/12 datasets).
-* A common driver with fixed timing makes the paper tests report false links in 50–100%
-  of datasets; the surrogate tests remove them. A common driver whose timing varies by year
-  fools every test.
-* On the campaign data, the paper tests find a link for 7 of 8 campaign × direction
-  pairs. Against the surrogates, only **Movember, MC → GT** survives correction for
-  multiple testing (lsNGC, Holm-adjusted p = 0.040, stable across lag orders). The effect
-  is small: 2.7% of the remaining variance, against 0.6% for surrogates.
-* **Octobre Rose** shows no link beyond the calendar, although its paper tests are the most
-  significant.
+* **Linear Granger causality** (within-season lags): past searches help predict press
+  coverage for Mars Bleu, Movember and Octobre Rose (jackknife intervals clearly above
+  zero). Past coverage is significant for searches in three campaigns, but the gains are
+  tiny, their intervals include zero for Dry January and Octobre Rose, and the impulse
+  responses show that higher coverage is *not* followed by higher searches, except for
+  Dry January.
+* **Simulations** (100 datasets per scenario): a common driver with fixed timing makes the
+  standard tests report spurious links in 39–100% of datasets; season-swap surrogates bring
+  this down to 4–7%. A common driver whose timing changes from year to year still fools
+  every test (32–94% with surrogates).
+* **Against surrogates**, one link is robust: **Movember, MC → GT** with lsNGC
+  (Holm-adjusted p = 0.040 within its family of eight tests, significant for all 10 k-means
+  initialisations). Its effect is small: 2.7% of the variance left unexplained by past
+  searches (jackknife 95% interval 0.9–4.4%), against 0.6% for surrogates.
+  **Mars Bleu, GT → MC** is borderline (significant for 5 of 10 initialisations).
+  **Octobre Rose** shows no link beyond its calendar.
 * These are predictive links beyond a fixed calendar, not proof of a causal effect.
+
+Full results: `results/tables/` and `results/figures/`.

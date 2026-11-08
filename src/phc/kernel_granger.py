@@ -437,3 +437,60 @@ def run_tests(df, effect, cause, m, conditional=False, start=None, n_surrogates=
                     f"{key}_p_surr": surrogate_pvalue(o["delta"], null)})
         out["nulls"][key] = (o["delta"], null)
     return out
+
+
+# ---------------------------------------------------------------------------
+# Season bootstrap of the test statistic
+# ---------------------------------------------------------------------------
+def resample_seasons(df: pd.DataFrame, rng: np.random.Generator) -> pd.DataFrame:
+    """Draw seasons with replacement; each draw gets a unique season label."""
+    seasons = list(dict.fromkeys(df["season"]))
+    pick = rng.choice(len(seasons), size=len(seasons), replace=True)
+    return pd.concat([df[df["season"] == seasons[i]].assign(season=f"b{j}_{seasons[i]}")
+                      for j, i in enumerate(pick)])
+
+
+def delta_stat(df, effect, cause, m, method, conditional=False, start=None, seed=0) -> float:
+    """Statistic delta of one method on one dataset (no surrogates)."""
+    d = make_design(df, effect, cause, m, start=start)
+    X = d.X(conditional)
+    if method == "kgc_lin":
+        return KGC(d.y, X, "poly", 1).stat(d.cause)["delta"]
+    if method == "kgc_se":
+        return KGC(d.y, X, "se", se_lengthscale(X.shape[1] + d.cause.shape[1])).stat(d.cause)["delta"]
+    if method == "lsngc":
+        return LSNGC(d.y, X, seed=seed).stat(d.cause)["delta"]
+    raise ValueError(method)
+
+
+def bootstrap_delta(df, effect, cause, m, method, n_boot=499, seed=0, conditional=False,
+                    start=None) -> np.ndarray:
+    """Season-bootstrap distribution of delta (seasons resampled with replacement).
+
+    Not used in the notebooks: duplicated seasons inflate in-sample statistics such as
+    delta, so the bootstrap distribution is shifted upwards. Use ``jackknife_delta``.
+    """
+    rng = np.random.default_rng(seed)
+    return np.array([delta_stat(resample_seasons(df, rng), effect, cause, m, method,
+                                conditional, start) for _ in range(n_boot)])
+
+
+def jackknife_delta(df, effect, cause, m, method, seed=0, conditional=False,
+                    start=None) -> np.ndarray:
+    """Delete-one-season jackknife replicates of delta.
+
+    Unlike the bootstrap, no season is duplicated, which matters here: duplicated seasons
+    inflate in-sample fit statistics such as delta.
+    """
+    seasons = list(dict.fromkeys(df["season"]))
+    return np.array([delta_stat(df[df["season"] != s], effect, cause, m, method,
+                                conditional, start, seed) for s in seasons])
+
+
+def jackknife_ci(estimate: float, replicates, level: float = 0.95) -> tuple[float, float, float]:
+    """Jackknife standard error and normal-approximation interval around the estimate."""
+    v = np.asarray(replicates, float)
+    n = len(v)
+    se = float(np.sqrt((n - 1) / n * np.sum((v - v.mean()) ** 2)))
+    z = stats.norm.ppf(0.5 + level / 2)
+    return se, estimate - z * se, estimate + z * se

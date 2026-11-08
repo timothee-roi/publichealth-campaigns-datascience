@@ -190,3 +190,51 @@ def stationarity(df: pd.DataFrame) -> pd.DataFrame:
         rows.append({"series": col, "adf_stat": adf_stat, "adf_pval": adf_p,
                      "kpss_stat": kpss_stat, "kpss_pval": kpss_p})
     return pd.DataFrame(rows)
+
+
+# ---------------------------------------------------------------------------
+# Season bootstrap and impulse responses
+# ---------------------------------------------------------------------------
+def resample_seasons(df: pd.DataFrame, rng: np.random.Generator) -> pd.DataFrame:
+    """Draw seasons with replacement; each draw gets a unique season label."""
+    seasons = list(dict.fromkeys(df["season"]))
+    pick = rng.choice(len(seasons), size=len(seasons), replace=True)
+    return pd.concat([df[df["season"] == seasons[i]].assign(season=f"b{j}_{seasons[i]}")
+                      for j, i in enumerate(pick)])
+
+
+def impulse_response(df: pd.DataFrame, effect: str, cause: str, p1: int, p2: int,
+                     horizon: int = 30, shock: float = 10.0, by_season: bool = True) -> np.ndarray:
+    """Response of the effect to a one-off pulse of ``shock`` points in the cause at day 0.
+
+    Dynamic multipliers of the fitted full model
+        effect_t = c + sum_k a_k effect_{t-k} + sum_k b_k cause_{t-k},
+    computed recursively: r_0 = 0, r_t = sum_k a_k r_{t-k} + b_t * shock (b_t = 0 for t > p2).
+    Units are those of the series (0-100 within each season).
+    """
+    y, _, X = lag_design(df, effect, cause, p1, p2, by_season=by_season)
+    Xc = np.column_stack([np.ones(len(y)), X])
+    beta, *_ = np.linalg.lstsq(Xc, y, rcond=None)
+    a, b = beta[1:1 + p1], beta[1 + p1:]
+    r = np.zeros(horizon + 1)
+    for t in range(1, horizon + 1):
+        r[t] = sum(a[k - 1] * r[t - k] for k in range(1, min(t, p1) + 1))
+        if t <= p2:
+            r[t] += b[t - 1] * shock
+    return r
+
+
+def bootstrap_linear(df: pd.DataFrame, effect: str, cause: str, p1: int, p2: int,
+                     n_boot: int = 999, seed: int = 0, horizon: int = 30, shock: float = 10.0,
+                     by_season: bool = True) -> tuple[np.ndarray, np.ndarray]:
+    """Season bootstrap (lags fixed) of the adjusted-R2 gain and of the impulse response.
+
+    Returns (delta_r2adj of shape (n_boot,), impulse responses of shape (n_boot, horizon + 1)).
+    """
+    rng = np.random.default_rng(seed)
+    d_r2, irfs = np.empty(n_boot), np.empty((n_boot, horizon + 1))
+    for i in range(n_boot):
+        b = resample_seasons(df, rng)
+        d_r2[i] = granger_test(b, effect, cause, p1, p2, by_season=by_season)["delta_r2adj"]
+        irfs[i] = impulse_response(b, effect, cause, p1, p2, horizon, shock, by_season)
+    return d_r2, irfs
