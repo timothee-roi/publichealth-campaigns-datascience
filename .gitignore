@@ -9,3 +9,10 @@ __pycache__/
 data/raw/
 data/processed/daily_recollected/
 data/processed/queries/mc_stories_*.csv
+
+# LaTeX build files
+report/*.aux
+report/*.log
+report/*.out
+report/*.pdf
+report/*.toc

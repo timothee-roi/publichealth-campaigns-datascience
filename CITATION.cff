@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this code or data, please cite it as below."
+title: "Media coverage and online search interest during French health awareness campaigns: Granger causality and transfer functions beyond the campaign calendar"
+type: software
+authors:
+  - family-names: Roina
+    given-names: Timothée
+repository-code: "https://github.com/timothee-roi/publichealth-campaigns-datascience"
+date-released: "2026-11-11"
+keywords:
+  - infodemiology
+  - Google Trends
+  - MediaCloud
+  - Granger causality
+  - transfer functions
+  - health awareness campaigns
