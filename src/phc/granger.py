@@ -144,6 +144,30 @@ def granger_test(df: pd.DataFrame, effect: str, cause: str, p1: int, p2: int,
                 delta_r2adj=r2a_full - r2a_red)
 
 
+def granger_test_fe(df: pd.DataFrame, effect: str, cause: str, p1: int, p2: int) -> dict:
+    """Granger F-test with within-season lags and one intercept per season.
+
+    As ``granger_test(..., by_season=True)``, but both models also contain season fixed
+    effects, so that differences in the level of a series between seasons (the size of the
+    campaign in a given year) cannot make the past of the cause "predict" the effect. The
+    degrees of freedom count the S - 1 extra parameters.
+    """
+    start = max(p1, p2)
+    y, X_red, X_full = lag_design(df, effect, cause, p1, p2, by_season=True)
+    counts = [len(g) - start for _, g in df.groupby("season", sort=False) if len(g) > start]
+    D = pd.get_dummies(np.repeat(np.arange(len(counts)), counts)).to_numpy(float)[:, 1:]
+    n, S = len(y), len(counts)
+    tss = float(((y - y.mean()) ** 2).sum())
+    rss_red, rss_full = _rss(np.hstack([X_red, D]), y), _rss(np.hstack([X_full, D]), y)
+    k_red, k_full = p1 + S - 1, p1 + p2 + S - 1
+    F = ((rss_red - rss_full) / p2) / (rss_full / (n - k_full - 1))
+    pval = float(stats.f.sf(F, p2, n - k_full - 1))
+    adj = lambda rss, k: 1 - (rss / (n - k - 1)) / (tss / (n - 1))
+    return dict(p1=p1, p2=p2, n=n, F=F, pval=pval,
+                r2adj_red=adj(rss_red, k_red), r2adj_full=adj(rss_full, k_full),
+                delta_r2adj=adj(rss_full, k_full) - adj(rss_red, k_red))
+
+
 def loyo(df: pd.DataFrame, effect: str, cause: str, p1: int, p2: int,
          by_season: bool = False, alpha: float = 0.05) -> pd.DataFrame:
     """Leave-one-season-out: re-run the test with each season removed.

@@ -76,6 +76,25 @@ class Design:
     cause_panel: np.ndarray  # standardised cause, (n_seasons, L), used for surrogates
     m: int
     start: int
+    first_weekday: np.ndarray = None  # weekday (0 = Monday) of day 0 of each season
+
+    def swapped_panel(self, perm, align_weekday: bool = False) -> np.ndarray:
+        """Cause panel in which season s receives the cause of season perm[s].
+
+        align_weekday=False: the donor is aligned by day in the window (same calendar date).
+        align_weekday=True : the donor is also shifted by j days, -3 <= j <= 3, so that
+        every day receives a donor day with the same day of the week. The calendar date
+        then differs by at most three days; days beyond the window edge repeat the edge.
+        """
+        perm = np.asarray(perm)
+        if not align_weekday:
+            return self.cause_panel[perm]
+        L = self.cause_panel.shape[1]
+        out = np.empty_like(self.cause_panel)
+        for s, donor in enumerate(perm):
+            j = (self.first_weekday[s] - self.first_weekday[donor] + 3) % 7 - 3
+            out[s] = self.cause_panel[donor, np.clip(np.arange(L) + j, 0, L - 1)]
+        return out
 
     def X(self, conditional: bool) -> np.ndarray:
         """Restricted inputs: past of the effect (+ calendar)."""
@@ -123,7 +142,8 @@ def make_design(df: pd.DataFrame, effect: str, cause: str, m: int,
     cal[:, 0] = (cal[:, 0] - cal[:, 0].mean()) / cal[:, 0].std()
     des = Design(y=y, own=own, cause=None, calendar=cal,
                  season=np.repeat(np.arange(len(groups)), len(idx)),
-                 cause_panel=c_panel, m=m, start=start)
+                 cause_panel=c_panel, m=m, start=start,
+                 first_weekday=np.array([pd.DatetimeIndex(g.index)[0].dayofweek for g in groups]))
     des.cause = des.cause_from_panel(c_panel)
     return des
 
@@ -410,13 +430,13 @@ def select_lag(df, effect, cause, lags=(1, 2, 3, 5, 7), conditional=False,
 
 
 def run_tests(df, effect, cause, m, conditional=False, start=None, n_surrogates=199,
-              seed=0, methods=("kgc_lin", "kgc_se", "lsngc")) -> dict:
+              seed=0, methods=("kgc_lin", "kgc_se", "lsngc"), align_weekday=False) -> dict:
     """KGC (linear and SE kernels) and lsNGC for the direction cause -> effect, with the
     paper's parametric tests and season-swap surrogate p-values."""
     d = make_design(df, effect, cause, m, start=start)
     X = d.X(conditional)
     perms = derangements(d.cause_panel.shape[0], n_surrogates, np.random.default_rng(seed))
-    surr = [d.cause_from_panel(d.cause_panel[p]) for p in perms]
+    surr = [d.cause_from_panel(d.swapped_panel(p, align_weekday)) for p in perms]
     out = {"m": m, "n": len(d.y), "conditional": conditional, "nulls": {}}
     for key in methods:
         if key.startswith("kgc"):

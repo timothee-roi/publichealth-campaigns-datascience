@@ -1,0 +1,9 @@
+# Exact versions with which the results in results/ were produced (Python 3.13).
+numpy==2.5.3
+pandas==3.0.5
+scipy==1.18.1
+statsmodels==0.15.0
+scikit-learn==1.9.1
+matplotlib==3.11.2
+joblib==1.6.0
+pillow==12.3.0

@@ -54,22 +54,63 @@ def independent(seed=0):
                   [_ar1(rng, L) for _ in range(N_SEASONS)])
 
 
-def common_driver(seed=0, jitter=0, amplitude=3.0):
+def _weekly(s, weekday):
+    """Weekly cycle of season s: +0.4 * weekday on working days, -weekday at weekends.
+    Seasons start on 1 September of successive years, so the cycle shifts between seasons."""
+    wd = (pd.Timestamp(f"{2015 + s}-09-01").dayofweek + np.arange(L)) % 7
+    return weekday * np.where(wd >= 5, -1.0, 0.4)
+
+
+def common_driver(seed=0, jitter=0, amplitude=3.0, weekday=0.0):
     """No direct link: a campaign pulse drives both series.
 
     The pulse peaks around day 45; MC follows it on the same day, GT two days later.
     jitter = 0: same timing every season (a fixed calendar).
     jitter > 0: the peak day moves by up to +/- jitter days from one season to the next.
+    weekday > 0: both series also share a weekly cycle (lower at weekends), of amplitude
+    ``weekday`` for MC and 0.6 * ``weekday`` for GT.
     """
     rng = np.random.default_rng(seed)
     day = np.arange(L)
     gt, mc = [], []
-    for _ in range(N_SEASONS):
+    for s in range(N_SEASONS):
         c = 45 + (rng.integers(-jitter, jitter + 1) if jitter else 0)
         pulse = np.exp(-0.5 * ((day - c) / 6) ** 2)
         pulse_late = np.exp(-0.5 * ((day - c - 2) / 6) ** 2)
-        mc.append(_ar1(rng, L) + amplitude * pulse)
-        gt.append(_ar1(rng, L) + amplitude * pulse_late)
+        w = _weekly(s, weekday)
+        mc.append(_ar1(rng, L) + amplitude * pulse + w)
+        gt.append(_ar1(rng, L) + amplitude * pulse_late + 0.6 * w)
+    return _frame(gt, mc)
+
+
+def transfer_system(seed=0, omega=0.5, delta=0.6, delay=1, feedback=0.0, weekday=0.5,
+                    pulse=3.0, jitter=0):
+    """GT -> MC through a known transfer function, on top of a shared calendar.
+
+    Day-to-day fluctuations (the part the transfer function acts on):
+        x_t = 0.5 x_{t-1} + feedback * y_{t-1} + e_t                    (GT)
+        y_t = u_t + n_t,  u_t = delta u_{t-1} + omega x_{t-delay},      (MC)
+              n_t = 0.4 n_{t-1} + e'_t.
+    The response of MC to a one-unit pulse of GT is omega * delta^(k - delay) for
+    k >= delay: gain omega / (1 - delta), half-life log(0.5) / log(delta).
+    Observed series add a campaign pulse (as in ``common_driver``) and a weekly cycle
+    (lower at weekends) to both. omega = 0 gives a system with no direct link.
+    """
+    rng = np.random.default_rng(seed)
+    day = np.arange(L)
+    gt, mc = [], []
+    for s in range(N_SEASONS):
+        ex, ey = rng.standard_normal(L), rng.standard_normal(L)
+        x, y, u, n = np.zeros(L), np.zeros(L), np.zeros(L), np.zeros(L)
+        for t in range(1, L):
+            x[t] = 0.5 * x[t - 1] + feedback * y[t - 1] + ex[t]
+            u[t] = delta * u[t - 1] + (omega * x[t - delay] if t >= delay else 0.0)
+            n[t] = 0.4 * n[t - 1] + ey[t]
+            y[t] = u[t] + n[t]
+        c = 45 + (rng.integers(-jitter, jitter + 1) if jitter else 0)
+        w = _weekly(s, weekday)
+        mc.append(y + pulse * np.exp(-0.5 * ((day - c) / 6) ** 2) + w)
+        gt.append(x + pulse * np.exp(-0.5 * ((day - c - 2) / 6) ** 2) + 0.6 * w)
     return _frame(gt, mc)
 
 
