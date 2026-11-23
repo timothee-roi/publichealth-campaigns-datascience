@@ -1,23 +1,20 @@
 # Media coverage and search interest during French health awareness campaigns
 
 Code and data for the report *Media Coverage and Online Search Interest during French
-Health Awareness Campaigns: Granger Causality and Transfer Functions beyond the Campaign
-Calendar*, by
+Health Awareness Campaigns: Granger Causality beyond the Campaign Calendar*, by
 Timothée Roina, supervised by Marie-Laure Charpignon.
 
 The project studies four recurring French awareness campaigns (Octobre Rose, Movember,
-Mars Bleu and Dry January) over eleven seasons (2015–2025). Google Trends (GT) serves as
-a proxy for public information-seeking and MediaCloud (MC) article volume as a measure of
-media salience. The analysis:
+Mars Bleu and Dry January) over eleven seasons (2015–2025). Google Trends (GT) measures
+what people search for and MediaCloud (MC) article counts measure media coverage. The analysis:
 
 * compares the timing of media and search peaks;
-* tests linear and nonlinear (kernel) Granger causality in both directions on daily
-  campaign windows, with lags kept within each season;
+* tests linear and nonlinear (kernel Granger causality, transfer entropy) Granger-type
+  causality in both directions on daily campaign windows, with lags kept within each season;
 * tests every link against season-swap surrogates, because the campaign calendar drives
   both series;
-* estimates transfer functions on calendar-adjusted series (delay, gain, persistence of
-  the response of one series to the other), separating the same-day association from
-  lagged responses;
+* repeats the tests after removing the weekly cycle, the level of each season and the
+  average campaign profile, to see what each link depends on;
 * validates every procedure on simulated systems with a known truth.
 
 ## Notebooks
@@ -27,16 +24,15 @@ media salience. The analysis:
 | [`01_query_building_and_data_collection`](notebooks/01_query_building_and_data_collection.ipynb) | GT snowball query discovery, MC article texts and k-grams, monthly series, daily campaign windows | §2 | no (APIs) |
 | [`02_visualisation_and_peak_timing`](notebooks/02_visualisation_and_peak_timing.ipynb) | Daily windows, seasons aligned on the GT peak, lag between MC and GT peaks | §3.1, §4.1 | yes |
 | [`03_granger_analysis`](notebooks/03_granger_analysis.ipynb) | Linear Granger causality with within-season lags: AIC lag selection, F-tests, LOYO, coefficients, jackknife intervals, impulse responses with bootstrap bands, sensitivity to the specification, season fixed effects | §4.3–4.4, App. C–D | yes |
-| [`04_nonlinear_kernel_granger`](notebooks/04_nonlinear_kernel_granger.ipynb) | Nonlinear Granger causality (KGC and transfer entropy), season-swap surrogates, validation on 100 simulated datasets per scenario, power of transfer entropy on linear lagged links, jackknife intervals, robustness to the number of neighbours, five calendar adjustments (weekly cycle, season level, campaign profile) | §3.4, §4.5–4.6, App. F–G | yes* |
+| [`04_nonlinear_kernel_granger`](notebooks/04_nonlinear_kernel_granger.ipynb) | Nonlinear Granger causality (KGC and transfer entropy), season-swap surrogates, validation on 100 simulated datasets per scenario, power of transfer entropy on linear lagged links, jackknife intervals, robustness to the number of neighbours, five calendar adjustments (weekly cycle, season level, campaign profile) | §3.3–3.5, §4.5–4.6, App. F–G | yes* |
 | [`05_report_figures`](notebooks/05_report_figures.ipynb) | Monthly GT vs MC series, snowball rounds, top k-grams, drawn from your data files | Figs. 1, 12, 13 | yes*** |
-| [`06_transfer_functions`](notebooks/06_transfer_functions.ipynb) | Calendar removal, pre-whitened cross-correlations, transfer functions (distributed lag, delay + decay), jackknife intervals, season-swap tests, validation on simulated systems, coherence and phase | §3.5, §4.7, App. E | yes** |
+| [`06_calendar_components`](notebooks/06_calendar_components.ipynb) | Campaign profile, weekly cycle and season level: share of the variance of each series, figure | App. E | yes |
 
 \* A full run takes about 6 hours on two cores (simulations, 999-surrogate tests under five
 calendar adjustments). Results are cached in `results/cache/kernel_granger.joblib`, so the
 notebook reopens in seconds; set `RECOMPUTE = True` to recompute everything.
 
-\*\* A full run takes about 1.5 hours on two cores (100 simulated datasets × 4 scenarios, 999
-surrogates per real test); results are cached in `results/cache/transfer.joblib`.
+\*\* Runs in seconds.
 
 \*\*\* Needs the monthly series, snowball rounds and k-grams in `data/raw/figures_input/`.
 These files are produced by notebook 01 or by the original collection notebooks, and
@@ -51,11 +47,8 @@ The shared code is in `src/phc/`:
 * `kernel_granger.py`: KGC (used in notebook 04), KPCR and GPSIC (implemented, not used),
   within-season lag design, season-swap surrogates, jackknife;
 * `transfer_entropy.py`: nearest-neighbour (KSG, Frenzel-Pompe) transfer entropy;
-* `transfer.py`: calendar removal, pre-whitening and cross-correlation, transfer-function
-  fits (distributed lag, delay + decay), residual checks, jackknife, season-swap tests,
-  cross-spectrum;
-* `simulate.py`: simulated seasonal systems with a known causal structure or transfer
-  function.
+* `seasonal.py`: calendar components (campaign profile, day of the week, season level);
+* `simulate.py`: simulated seasonal systems with a known causal structure.
 
 ## Getting started
 
@@ -112,15 +105,6 @@ Numbers refer to the report (`report/main.tex`); all tables are in `results/tabl
   everything removed, not reproduced by the other methods). Transfer entropy does not
   reproduce the Movember coverage → searches link found by lsNGC in an earlier version
   (removed). Octobre Rose shows no link with the linear and kernel tests.
-* **Transfer functions** (calendar, weekday and season level removed): searches and
-  coverage are associated **on the same day** for Movember, Mars Bleu and Dry January
-  (positive, delay 0, half-life under 0.6 day), not at all for Octobre Rose. A delayed
-  response is not established for any campaign: Movember searches → coverage is
-  borderline, Dry January coverage → searches (0.60 search point per coverage point over 14
-  days, half-life 2.6 days) is not confirmed by the second test and rests on 43 days per
-  season. The procedure is validated on simulated systems (known transfer function
-  recovered without bias) and has the same blind spot as the surrogate tests: it cannot
-  exclude a common driver whose date changes from year to year.
 * These are predictive associations beyond a fixed calendar, not evidence of causal effects.
 
 Full results: `results/tables/` and `results/figures/`.
