@@ -34,7 +34,7 @@ Granger Causality and Transfer Functions\\ beyond the Campaign Calendar}}
 \maketitle
 
 \begin{abstract}
-Whether media coverage and public interest follow each other during health awareness campaigns is rarely quantified. We study four recurring French campaigns (Octobre Rose, Movember, Mars Bleu, Dry January) over eleven seasons (2015--2025), combining Google Trends (GT), which measures what people search for online, with MediaCloud (MC) counts of press articles. Coverage and searches peak together for Octobre Rose and Dry January, while for Movember coverage peaks a median of nine days after searches. Because the campaign calendar and the weekly cycle drive both series, we compare linear and nonlinear (kernel) Granger tests with the same tests run on data in which one series comes from another season, and we estimate transfer functions on series stripped of the calendar. Simulations with a known truth show that the shared calendar alone produces the links that standard tests report in seven of eight campaign--direction pairs. One nonlinear link stands out: for Movember, media coverage predicts later searches (Holm-adjusted $p=0.008$), after removing the weekly cycle and the differences between seasons. Beyond the calendar, searches and coverage move together on the same day during Movember, Mars Bleu and Dry January. These associations are predictive, not evidence of a causal effect.
+Whether media coverage and public interest follow each other during health awareness campaigns is rarely quantified. We study four recurring French campaigns (Octobre Rose, Movember, Mars Bleu, Dry January) over eleven seasons (2015--2025), combining Google Trends (GT), which measures what people search for online, with MediaCloud (MC) counts of press articles. Coverage and searches peak together for Octobre Rose and Dry January, while for Movember coverage peaks a median of nine days after searches. Because the campaign calendar and the weekly cycle drive both series, we compare linear Granger tests, kernel Granger causality and transfer entropy with the same tests run on data in which one series comes from another season, and we estimate transfer functions on series stripped of the calendar. Simulations with a known truth show that the shared calendar alone produces the links that standard tests report in seven of eight campaign--direction pairs; the season-swap tests remove them, and transfer entropy, a model-free measure of predictive information, finds a purely nonlinear link in all 100 simulated datasets and is the least affected when the timing of a campaign varies from year to year. Applied to the campaigns, these tests show that the information that coverage and searches share is carried by the average campaign profile: once it is removed together with the weekly cycle and the season levels, one of 24 tests is significant. What remains is a same-day association between searches and coverage for Movember, Mars Bleu and Dry January (Holm-adjusted $p=0.008$), brief and absent for Octobre Rose, the campaign with the strongest standard tests. These are predictive associations, not evidence of a causal effect.
 \end{abstract}
 
 \noindent\textbf{Keywords:} infodemiology; digital health; health awareness campaigns; Google Trends; media coverage; Granger causality.
@@ -48,7 +48,7 @@ Recurring awareness campaigns such as Octobre Rose (breast cancer), Movember (pr
 
 \paragraph{The problem.} Campaign data violate a central assumption of Granger causality: that no unobserved variable drives both series. Two calendars do. The campaign calendar raises press coverage and searches on the same dates every year, and the weekly cycle lowers both at weekends. Either can make one series ``predict'' the other without any day-to-day link between them.
 
-\paragraph{Question and contributions.} We ask: \emph{during health awareness campaigns, does media coverage help predict public search interest, or the reverse, beyond the calendars that drive both; and if so, how large is the response, after what delay, and for how long?} We study the relationship between press coverage, measured with MediaCloud, and online search interest, measured with Google Trends, the first link of the cascade from awareness to information-seeking, screening and care. Our contributions are: (i) a linear and nonlinear (kernel) Granger analysis with lags restricted to each campaign season; (ii) season-swap surrogate tests, which remove the contribution of a fixed campaign calendar, repeated after removing the weekly cycle, the level of each season and the campaign profile in turn, to see what each link depends on; (iii) transfer functions estimated on calendar-adjusted series, which express the links as a delay, a gain and a persistence, separating same-day association from lagged response; and (iv) a check of every procedure on simulated seasonal systems in which the true answer is known.
+\paragraph{Question and contributions.} We ask: \emph{during health awareness campaigns, does media coverage help predict public search interest, or the reverse, beyond the calendars that drive both; and if so, how large is the response, after what delay, and for how long?} We study the relationship between press coverage, measured with MediaCloud, and online search interest, measured with Google Trends, the first link of the cascade from awareness to information-seeking, screening and care. Our contributions are: (i) a linear and nonlinear (kernel Granger causality and transfer entropy) analysis with lags restricted to each campaign season; (ii) season-swap surrogate tests, which remove the contribution of a fixed campaign calendar, repeated after removing the weekly cycle, the level of each season and the campaign profile in turn, to see what each link depends on; (iii) transfer functions estimated on calendar-adjusted series, which express the links as a delay, a gain and a persistence, separating same-day association from lagged response; and (iv) a check of every procedure on simulated seasonal systems in which the true answer is known.
 
 % ==================================================================
 \section{Data}\label{sec:data}
@@ -191,7 +191,7 @@ where $\nu_k$ is the response of $y$, $k$ days later, to a rise of one point in 
 \paragraph{Frequency domain.} The same question by period. With one Hann-tapered segment per season, the squared coherence at a frequency is the share of the variance of one series linearly related to the other, and the phase gives their delay. With 11 seasons, two unrelated series exceed a squared coherence of 0.26 at a given frequency 5\% of the time ($1-0.05^{1/10}$).
 
 \subsection{Checks on simulated data}\label{sec:simulation}
-On real data the truth is unknown, so we cannot tell whether a test finds links that exist and avoids inventing links that do not. We therefore first run every test on artificial data in which we chose the truth. A \emph{dataset} here is one artificial copy of the study: 11 seasons of 91 days of two series generated by a known rule, with fresh random noise each time. Repeating this 100 times for each scenario gives the share of datasets in which a test declares a link. The tests are run on four such systems, with 39 surrogates per test; rejection rates are reported with 95\% Wilson intervals: (a) a purely nonlinear link, where GT depends on the square of the previous day's MC, so that the two series have no linear correlation; (b) two independent series; (c) a common driver with fixed timing, a campaign pulse on the same days every year driving both series, with no direct link; and (d) a common driver whose timing varies by up to $\pm15$ days from year to year, again with no direct link. The transfer-function procedure is checked separately on systems in which GT acts on MC through a known transfer function ($\nu_k=0.5\times0.6^{k-1}$ for $k\ge1$: delay one day, response cumulated over 14 days 1.249, half-life 1.36 days) on top of a campaign pulse and a weekly cycle shared by both series: (e) with this link only; (f) with the link and a feedback of MC on GT ($\nu_k=0.15\times0.5^{k-1}$, cumulated response 0.300); (g) with no link and a fixed calendar; (h) with no link and a campaign pulse whose timing varies by up to $\pm15$ days. There are 100 datasets per scenario and 99 surrogates per test. Finally, to check whether a weekly cycle shared by both series makes the surrogate tests find links, system (c) is given a shared weekly cycle (a weekend dip of 0.7 for MC and 0.42 for GT relative to working days, i.e.\ 7\% of the variance of the AR(1) noise for MC; the weekly term carries 0.2--9\% of the variance of the real series, Appendix Figure~\ref{fig:tfcal}) and the tests are run under adjustments (A) and (B), and with weekday-aligned surrogates (100 datasets, 39 surrogates).
+On real data the truth is unknown, so we cannot tell whether a test finds links that exist and avoids inventing links that do not. We therefore first run every test on artificial data in which we chose the truth. A \emph{dataset} here is one artificial copy of the study: 11 seasons of 91 days of two series generated by a known rule, with fresh random noise each time. Repeating this 100 times for each scenario gives the share of datasets in which a test declares a link. The tests are run on four such systems, with 39 surrogates per test; rejection rates are reported with 95\% Wilson intervals: (a) a purely nonlinear link, where GT depends on the square of the previous day's MC, so that the two series have no linear correlation; (b) two independent series; (c) a common driver with fixed timing, a campaign pulse on the same days every year driving both series, with no direct link; and (d) a common driver whose timing varies by up to $\pm15$ days from year to year, again with no direct link. The transfer-function procedure is checked separately on systems in which GT acts on MC through a known transfer function ($\nu_k=0.5\times0.6^{k-1}$ for $k\ge1$: delay one day, response cumulated over 14 days 1.249, half-life 1.36 days) on top of a campaign pulse and a weekly cycle shared by both series: (e) with this link only; (f) with the link and a feedback of MC on GT ($\nu_k=0.15\times0.5^{k-1}$, cumulated response 0.300); (g) with no link and a fixed calendar; (h) with no link and a campaign pulse whose timing varies by up to $\pm15$ days. There are 100 datasets per scenario and 99 surrogates per test. Finally, to check whether a weekly cycle shared by both series makes the surrogate tests find links, system (c) is given a shared weekly cycle (a weekend dip of 0.7 for MC and 0.42 for GT relative to working days, i.e.\ 7\% of the variance of the AR(1) noise for MC; the weekly term carries 0.2--9\% of the variance of the real series, Appendix Figure~\ref{fig:tfcal}) and the tests are run under adjustments (A) and (B), and with weekday-aligned surrogates (100 datasets, 39 surrogates). Because a null result is informative only if the test could have found the effect, transfer entropy is also run on systems (e)--(h) (100 datasets, 39 surrogates), where the link is linear and lagged.
 
 % ==================================================================
 \section{Results}
@@ -289,66 +289,66 @@ Octobre Rose & GT $\to$ MC & (13, 15) & 836 & 0.517 & 0.551 & 0.0338    & [0.009
 \end{table}
 
 \subsection{Checks on simulated data}
-Figure~\ref{fig:simulation} shows how often each test declares a link in 100 simulated datasets per scenario (p-values for one dataset per scenario in Appendix Figure~\ref{fig:simsingle}). KGC and lsNGC detect the purely nonlinear MC $\to$ GT link in all 100 datasets, with or without surrogates, whereas linear Granger causality detects it in only 27--29. When there is no link (independent series, and the GT $\to$ MC direction of the nonlinear system), every test declares a link in 0--7\% of the datasets, consistent with the nominal 5\% level given the simulation uncertainty (with 100 datasets, a true rate of 5\% is observed between about 2\% and 11\%). Under a common driver with fixed timing, the standard tests report spurious links in 39--100\% of the datasets; with season-swap surrogates this drops to 4--7\%. Under a common driver whose timing varies across years, all tests, surrogate tests included, still report spurious links (32--94\% of the datasets). Standard Granger tests are therefore not interpretable on campaign data; surrogate tests remove the effect of a fixed calendar, but not that of events whose date changes from year to year.
+Figure~\ref{fig:simulation} shows how often each test declares a link in 100 simulated datasets per scenario (p-values for one dataset per scenario in Appendix Figure~\ref{fig:simsingle}). KGC and transfer entropy detect the purely nonlinear MC $\to$ GT link in all 100 datasets, whereas linear Granger causality detects it in only 27--29. When there is no link (independent series, and the GT $\to$ MC direction of the nonlinear system), every test declares a link in 0--7\% of the datasets (2--3\% for transfer entropy), consistent with the nominal 5\% level given the simulation uncertainty (with 100 datasets, a true rate of 5\% is observed between about 2\% and 11\%). Under a common driver with fixed timing, the standard tests report spurious links in 39--100\% of the datasets; with season-swap surrogates this drops to 2--7\%. Under a common driver whose timing varies across years, the surrogate tests still report spurious links: 94\% and 48\% of the datasets for the linear test, 77\% and 32\% for KGC, and fewer, 38\% and 11\%, for transfer entropy (MC $\to$ GT and GT $\to$ MC, respectively). Standard Granger tests are therefore not interpretable on campaign data; surrogate tests remove the effect of a fixed calendar, but not that of events whose date changes from year to year.
+
+On the linear systems of Section~\ref{sec:tfresults}, transfer entropy detects the lagged response of MC to GT (cumulated response 1.249) in all 100 datasets and rejects in 2--3\% of the datasets when there is no link and the calendar is fixed. It misses weaker effects: the feedback of MC on GT (cumulated response 0.300) is detected in 10 of 100 datasets, whereas the transfer-function test for lagged response detects it in 80. When the timing of the campaign pulse varies, transfer entropy rejects in 10\% (GT $\to$ MC) and 34\% (MC $\to$ GT) of the datasets without link. A null result of transfer entropy therefore excludes strong lagged links, not weak ones.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\linewidth]{kg02_simulation_rates}
-  \caption{Share of 100 simulated datasets in which each test declares a link, for four systems with a known truth, with 95\% Wilson intervals (dashed line: 5\%). ``Paper test'': parametric test of the original method; ``surrogates'': season-swap surrogate test (39 surrogates).}
+  \caption{Share of 100 simulated datasets in which each test declares a link, for four systems with a known truth, with 95\% Wilson intervals (dashed line: 5\%). ``Paper test'': parametric test of the original method (none exists for transfer entropy); ``surrogates'': season-swap surrogate test (39 surrogates).}
   \label{fig:simulation}
 \end{figure}
 
-\subsection{Links beyond the campaign calendar}
-Table~\ref{tab:surrogates} reports the surrogate tests on campaign data, and Appendix Figure~\ref{fig:main} compares them with the standard tests. Without accounting for the calendar, at least one of the three standard tests is significant for 7 of the 8 campaign--direction pairs (all except Mars Bleu MC $\to$ GT), a pattern that the simulations show a shared calendar alone can produce.
+\subsection{Links beyond the campaign calendar}\label{sec:beyond}
+Table~\ref{tab:surrogates} reports the surrogate tests on campaign data, and Appendix Figure~\ref{fig:main} compares them with the standard tests. Without accounting for the calendar, at least one of the standard tests (the $F$-test of Section~\ref{sec:linear} and the parametric tests of KGC with a linear and a squared-exponential kernel) is significant for 7 of the 8 campaign--direction pairs (all except Mars Bleu MC $\to$ GT), a pattern that the simulations show a shared calendar alone can produce.
 
-Against season-swap surrogates, one link survives correction for multiple testing within the family of eight tests: \textbf{Movember, MC $\to$ GT}, with lsNGC (unadjusted $p=0.005$, the real coverage series beating all 199 surrogates; Holm-adjusted $p=0.040$). It does so for all 10 k-means initialisations of lsNGC ($\delta$ between 0.024 and 0.028, $p=0.005$ each time; Appendix Table~\ref{tab:seeds}). The effect is small: media coverage explains 2.7\% of the variance of searches left unexplained by their own past (jackknife 95\% interval 0.9\% to 4.4\%), against 0.6\% on average for surrogates (Appendix Figures~\ref{fig:null}--\ref{fig:jkdelta}). The link is robust to the lag order: with lsNGC it holds at every order from 1 to 7 days, and KGC with a squared-exponential kernel gives surrogate p-values of 0.025 at 5 and 7 days but not at 2 days ($p=0.30$; Appendix Figure~\ref{fig:lagsens}). With calendar conditioning the link points in the same direction but no longer survives correction (unadjusted $p=0.015$, adjusted $p=0.12$).
+Against season-swap surrogates, almost nothing survives correction for multiple testing within the family of eight tests. Without calendar conditioning, only the linear test for Mars Bleu GT $\to$ MC is significant (adjusted $p=0.040$); with it, only Dry January GT $\to$ MC, with the linear test and with transfer entropy (both 0.040). The KGC test with the squared-exponential kernel is never significant, and no transfer-entropy estimate exceeds its surrogates after correction in the unconditional variant (closest: Octobre Rose MC $\to$ GT, adjusted $p=0.080$). Transfer entropy gives no support to a link from coverage to searches for Movember ($\delta=-0.007$ against a chance level of $-0.0002$, $p=0.75$), but a modest one in the other direction (searches to coverage, $\delta=0.028$ against 0.009, unadjusted $p=0.020$, adjusted 0.14; jackknife interval $-0.006$ to 0.061), in line with the linear tests. The number of neighbours of the estimator matters little: with 3 or 10 instead of 5, one test crosses 0.05 (Octobre Rose MC $\to$ GT with 3, Dry January GT $\to$ MC with 10, adjusted $p=0.040$ in both cases), the same two pairs that stand out with 5, and the Movember coverage-to-searches estimate stays below its surrogates (Appendix Table~\ref{tab:te-k}).
 
-\paragraph{Which part of the calendar does the link depend on?} Table~\ref{tab:adjust} repeats the lsNGC tests with 999 surrogates after the five adjustments of Section~\ref{sec:calendar}. The Movember link is unchanged by removing the weekly cycle or the season means (Holm-adjusted $p=0.008$, the smallest attainable, in variants A, B and C); the statistic falls from 0.027 to 0.018 when the weekly cycle is removed (chance level 0.006), and 8 of 10 k-means initialisations remain significant after correction (10 of 10 with weekday-aligned surrogates; Appendix Table~\ref{tab:seeds-weekly}). It disappears when the average campaign profile is subtracted from both series (variant D: $\delta=0.007$, chance level 0.004, unadjusted $p=0.19$; variant E: 0.12 unadjusted, 0.85 adjusted). The linear and KGC tests behave differently: they are significant for Movember with the series unadjusted (adjusted $p=0.021$ and $0.040$) but not once the weekly cycle is removed (0.44 and 0.32), although a simulation with a shared weekly cycle did not reproduce such false positives (0--2\% rejections under variant A, 3--6\% under variant B; Appendix Figure~\ref{fig:weekly}). We therefore keep the nonlinear result and drop the linear and KGC ones, without having identified why the real weekly cycle matters more than the simulated one.
-
-A link that needs the average campaign profile to be present, but not the weekly cycle or the level of each season, and that has no counterpart in the transfer function of the calendar-adjusted series (Section~\ref{sec:tfresults}: lagged response of searches to coverage $0.01$, interval $-0.10$ to $0.11$), is not a day-to-day response of searches to coverage. What it detects instead cannot be told from these data: it could be the size or timing of the campaign in a given year, shared by coverage and searches, or an interaction between that size and the profile that an additive adjustment does not remove.
+\paragraph{Which part of the calendar do the signals depend on?} Table~\ref{tab:adjust} repeats the transfer-entropy tests with 999 surrogates after the five adjustments of Section~\ref{sec:calendar}; Appendix Table~\ref{tab:adjust-all} gives the linear and KGC tests. Three campaign--direction pairs are significant after correction for two methods under the same adjustment: Movember MC $\to$ GT (linear 0.021 and KGC 0.040 without adjustment, linear 0.016 with the season means removed), Mars Bleu GT $\to$ MC (linear and KGC 0.016 with the season means removed) and Dry January GT $\to$ MC (linear and transfer entropy 0.048 with the weekly cycle removed). A fourth, Octobre Rose MC $\to$ GT, is significant with transfer entropy only (0.032 without adjustment, 0.070 with the weekly cycle removed). None of these survives the removal of the average campaign profile (adjustments D and E), except KGC for Mars Bleu GT $\to$ MC when everything is removed (0.040), which the linear test (0.62) and transfer entropy (0.91) do not reproduce. The signals therefore concern the shape of the campaign in each year, not departures from it: whether that shape is the size of the campaign, its timing, or an interaction between the two cannot be told from these data. The Movember coverage-to-searches association, significant with the linear and KGC tests, also disappears when the weekly cycle is removed (0.44 and 0.32), although a simulation with a shared weekly cycle did not reproduce such false positives (0--2\% rejections under variant A, 0--6\% under variant B; Appendix Figure~\ref{fig:weekly}), and we have not identified why the real weekly cycle matters more than the simulated one.
 
 \begin{table}[htbp]
 \centering
-\caption{lsNGC: Holm-adjusted surrogate $p$-values (999 surrogates, eight tests per column) after five calendar adjustments of both series. A: none; B: weekly cycle removed; C: season means removed; D: campaign profile and weekly cycle removed, season means kept; E: profile, weekly cycle and season means removed. Bold: $p<0.05$. $m$: lag order. Linear and KGC results are in Appendix Table~\ref{tab:adjust-all}.}
+\caption{Transfer entropy: Holm-adjusted surrogate $p$-values (999 surrogates, eight tests per column) after five calendar adjustments of both series. A: none; B: weekly cycle removed; C: season means removed; D: campaign profile and weekly cycle removed, season means kept; E: profile, weekly cycle and season means removed. Bold: $p<0.05$. $m$: number of lags (at most 3).}
 \label{tab:adjust}
 \small
 \begin{tabular}{llcccccc}
 \toprule
 Campaign & Direction & $m$ & A & B & C & D & E \\
 \midrule
-Dry January & GT $\to$ MC & 1 & 0.32 & 0.35 & 0.59 & 0.34 & 1.00 \\
- & MC $\to$ GT & 2 & 0.46 & 0.35 & 0.59 & 0.81 & 0.85 \\
-Mars Bleu & GT $\to$ MC & 7 & 0.50 & 0.94 & \textbf{0.021} & 1.00 & 1.00 \\
- & MC $\to$ GT & 7 & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 \\
-Movember & GT $\to$ MC & 7 & 0.20 & 0.48 & 1.00 & 1.00 & 0.76 \\
- & MC $\to$ GT & 5 & \textbf{0.008} & \textbf{0.008} & \textbf{0.008} & 1.00 & 0.85 \\
-Octobre Rose & GT $\to$ MC & 5 & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 \\
- & MC $\to$ GT & 2 & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 \\
+Dry January & GT $\to$ MC & 1 & 0.17 & \textbf{0.048} & 1.00 & 0.96 & 0.88 \\
+ & MC $\to$ GT & 2 & 0.58 & 0.070 & 1.00 & 1.00 & 1.00 \\
+Mars Bleu & GT $\to$ MC & 3 & 0.46 & 0.26 & 0.72 & 1.00 & 0.91 \\
+ & MC $\to$ GT & 3 & 1.00 & 0.11 & 1.00 & 1.00 & 1.00 \\
+Movember & GT $\to$ MC & 3 & 0.17 & 0.80 & 0.83 & 0.64 & 0.096 \\
+ & MC $\to$ GT & 3 & 1.00 & 0.46 & 1.00 & 1.00 & 1.00 \\
+Octobre Rose & GT $\to$ MC & 3 & 0.58 & 0.80 & 1.00 & 1.00 & 1.00 \\
+ & MC $\to$ GT & 2 & \textbf{0.032} & 0.070 & 0.16 & 1.00 & 1.00 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\textbf{Octobre Rose shows no link beyond its calendar}, although its standard tests are among the most significant. For GT $\to$ MC, the real search series explains no more of press coverage than search series from other years (KGC: $\delta=0.312$ against 0.325 on average for surrogates). This agrees with the peak alignment of Table~\ref{tab:peaklag}: a fixed date (1 October) driving both series is enough to synchronise their peaks. \textbf{Mars Bleu, GT $\to$ MC, is not robust.} It is significant in some variants and not in others: lsNGC with the season means removed (variant C, adjusted $p=0.021$), the linear test unadjusted (0.008) and with season means removed (0.016), KGC with the full adjustment (0.040), but none of these with the weekly cycle removed (variant B: 0.94, 0.44, 1.00), and lsNGC is significant after correction for 5 of 10 k-means initialisations in the main run but 0 of 10 with the weekly cycle handled (Appendix Table~\ref{tab:seeds-weekly}). \textbf{Dry January} gives only isolated linear signals (GT $\to$ MC: Holm-adjusted $p=0.030$ without adjustment, 0.048 with the weekly cycle removed), not confirmed by the nonlinear methods in variants A--E.
+\textbf{Octobre Rose shows no link beyond its calendar with the linear and kernel tests}, although its standard tests are among the most significant. For GT $\to$ MC, the real search series explains no more of press coverage than search series from other years (KGC: $\delta=0.312$ against 0.325 on average for surrogates). This agrees with the peak alignment of Table~\ref{tab:peaklag}: a fixed date (1 October) driving both series is enough to synchronise their peaks. Transfer entropy finds a weak signal for MC $\to$ GT ($\delta=0.036$ against 0.004 for surrogates; jackknife interval $-0.007$ to 0.078), which is not stable to the weekly cycle (adjusted $p=0.070$) and is absent once the profile is removed. \textbf{Mars Bleu, GT $\to$ MC, is not robust}: it is significant for the linear test without adjustment (0.008) and with season means removed (0.016), for KGC with season means removed (0.016) and with everything removed (0.040), but for none of the three methods with the weekly cycle removed (variant B: 0.44, 1.00, 0.26). \textbf{Dry January GT $\to$ MC} is the signal that two methods with different assumptions share (linear and transfer entropy, with calendar conditioning, 0.040 each, and with the weekly cycle removed, 0.048 each), but the window holds only 43 days per season, it is not significant for transfer entropy without conditioning (0.24), and it vanishes with the whole calendar removed (0.60 and 0.88).
 
 \begin{table}[htbp]
 \centering
-\caption{Season-swap surrogate tests: Holm-adjusted p-values (199 surrogates; smallest attainable unadjusted p-value 0.005). Lin.: linear Granger causality (KGC with a degree-1 polynomial kernel); KGC: squared-exponential kernel; $m$: lag order. Bold: $p<0.05$.}
+\caption{Season-swap surrogate tests: Holm-adjusted p-values (199 surrogates; smallest attainable unadjusted p-value 0.005). Lin.: linear Granger causality (KGC with a degree-1 polynomial kernel); KGC: squared-exponential kernel; TE: transfer entropy (which uses at most the first 3 of the $m$ lags). Bold: $p<0.05$.}
 \label{tab:surrogates}
 \small
 \begin{tabular}{llcccccccc}
 \toprule
  & & \multicolumn{4}{c}{Unconditional} & \multicolumn{4}{c}{Calendar-conditioned} \\
 \cmidrule(lr){3-6}\cmidrule(lr){7-10}
-Campaign & Direction & $m$ & Lin. & KGC & lsNGC & $m$ & Lin. & KGC & lsNGC \\
+Campaign & Direction & $m$ & Lin. & KGC & TE & $m$ & Lin. & KGC & TE \\
 \midrule
-Dry January  & GT $\to$ MC & 1 & 0.09 & 0.70 & 0.39 & 1 & \textbf{0.04} & 1.00 & 1.00 \\
-             & MC $\to$ GT & 2 & 0.26 & 0.70 & 0.40 & 3 & 0.48 & 1.00 & 1.00 \\
-Mars Bleu    & GT $\to$ MC & 7 & \textbf{0.04} & 1.00 & 0.52 & 7 & 0.12 & 1.00 & 0.14 \\
-             & MC $\to$ GT & 7 & 1.00 & 1.00 & 1.00 & 3 & 1.00 & 1.00 & 1.00 \\
-Movember     & GT $\to$ MC & 7 & 0.09 & 1.00 & 0.39 & 5 & 0.12 & 1.00 & 0.27 \\
-             & MC $\to$ GT & 5 & 0.07 & 0.12 & \textbf{0.04} & 2 & 0.07 & 1.00 & 0.12 \\
-Octobre Rose & GT $\to$ MC & 5 & 1.00 & 1.00 & 1.00 & 3 & 1.00 & 0.24 & 1.00 \\
-             & MC $\to$ GT & 2 & 1.00 & 1.00 & 1.00 & 2 & 1.00 & 1.00 & 1.00 \\
+Dry January & GT $\to$ MC & 1 & 0.090 & 0.70 & 0.24 & 1 & \textbf{0.040} & 1.00 & \textbf{0.040} \\
+ & MC $\to$ GT & 2 & 0.26 & 0.70 & 0.57 & 3 & 0.48 & 1.00 & 0.58 \\
+Mars Bleu & GT $\to$ MC & 7 & \textbf{0.040} & 1.00 & 0.47 & 7 & 0.12 & 1.00 & 1.00 \\
+ & MC $\to$ GT & 7 & 1.00 & 1.00 & 1.00 & 3 & 1.00 & 1.00 & 1.00 \\
+Movember & GT $\to$ MC & 7 & 0.090 & 1.00 & 0.14 & 5 & 0.12 & 1.00 & 0.42 \\
+ & MC $\to$ GT & 5 & 0.070 & 0.12 & 1.00 & 2 & 0.070 & 1.00 & 0.70 \\
+Octobre Rose & GT $\to$ MC & 5 & 1.00 & 1.00 & 0.48 & 3 & 1.00 & 0.24 & 0.70 \\
+ & MC $\to$ GT & 2 & 1.00 & 1.00 & 0.080 & 2 & 1.00 & 1.00 & 0.070 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -390,7 +390,7 @@ No link, timing varies  & GT $\to$ MC & 0     & 0.147 (0.107)    & 0.78 & 0.53 &
   \label{fig:ccf}
 \end{figure}
 
-\paragraph{Estimates.} Table~\ref{tab:tf} and Figure~\ref{fig:tfweights} give the weights. The same-day association is the dominant and most consistent feature: for Movember, Mars Bleu and Dry January, $\nu_0$ is positive has a surrogate $p$-value of 0.001 in every case but one (0.002 for Dry January GT $\to$ MC; Holm-adjusted $p=0.008$ throughout); the jackknife interval excludes zero for Movember and Mars Bleu and, narrowly, includes it for Dry January. The delay-and-decay models place the delay at 0 days in these three campaigns, with a decay $\delta$ between 0 and 0.29 (half-life under 0.6 days) in all cases but Dry January MC $\to$ GT: the associations are synchronous and brief. (The slopes of the two directions differ because the series have different spreads; the correlation is the same.) For Octobre Rose no same-day association is found, and the delay selected for a response that is not there (6 or 7 days) is unstable: the jackknife replicates give delays from 0 to 7 days (\texttt{results/tables/tf\_estimates.csv}), so it carries no information.
+\paragraph{Estimates.} Table~\ref{tab:tf} and Figure~\ref{fig:tfweights} give the weights. The same-day association is the dominant and most consistent feature: for Movember, Mars Bleu and Dry January, $\nu_0$ is positive, with a surrogate $p$-value of 0.001 in every case but one (0.002 for Dry January GT $\to$ MC; Holm-adjusted $p=0.008$ throughout); the jackknife interval excludes zero for Movember and Mars Bleu and, narrowly, includes it for Dry January. The delay-and-decay models place the delay at 0 days in these three campaigns, with a decay $\delta$ between 0 and 0.29 (half-life under 0.6 days) in all cases but Dry January MC $\to$ GT: the associations are synchronous and brief. (The slopes of the two directions differ because the series have different spreads; the correlation is the same.) For Octobre Rose no same-day association is found, and the delay selected for a response that is not there (6 or 7 days) is unstable: the jackknife replicates give delays from 0 to 7 days (\texttt{results/tables/tf\_estimates.csv}), so it carries no information.
 
 Lagged responses are weak. Only two of eight pairs show anything. For \textbf{Movember, GT $\to$ MC}, searches are followed by a positive lagged response (0.60, jackknife interval 0.09 to 1.10), but the test against surrogates is borderline (lagged fit: Holm-adjusted $p=0.088$; lagged sum: 0.78), and the weights are spread across lags without a clear shape (Figure~\ref{fig:tfweights}). For \textbf{Dry January, MC $\to$ GT}, coverage is followed by searches: lagged response 0.60 (0.20 to 1.01), a delay-and-decay response with gain 0.64, decay $\delta=0.77$ and half-life 2.6 days, and a 14-day cumulated response of 0.63 (0.28 to 0.97), consistent with the one-day lead of coverage in the cross-correlation. In other words, a rise of 10 points in coverage is followed by about 6 additional points of searches over two weeks. The lagged-sum test is significant after Holm correction ($p=0.024$) but the lagged-fit test is not ($p=0.41$ adjusted, 0.059 unadjusted), the sum statistic is the one that was liberal in simulation, and the window holds only 43 days per season. We treat it as a candidate to be re-examined with more seasons, not as a result.
 
@@ -431,24 +431,24 @@ Dry January & GT $\to$ MC & 0.18 [$-$0.02, 0.38] & 0.008 & $-$0.07 [$-$0.74, 0.6
 % ==================================================================
 \section{Discussion}
 % ==================================================================
-\paragraph{Most of the coupling reflects the campaign calendar.} Standard Granger tests, linear or nonlinear, find links between media coverage and searches for almost every campaign. Our simulations show that a shared calendar produces exactly this pattern, and the surrogate tests remove nearly all of it on real data. The most visible campaign, Octobre Rose, is the clearest case: its media and search peaks coincide, its standard tests are highly significant, yet its day-to-day media coverage carries no information about searches beyond what any year's coverage would. In the terms of agenda-setting theory \cite{mccombs1972}, our results do not support a strong, day-to-day transfer of attention from the media to the public during these campaigns; both channels respond to the same calendar.
+\paragraph{Most of the coupling reflects the campaign calendar.} Standard Granger tests, linear or nonlinear, find links between media coverage and searches for almost every campaign. Our simulations show that a shared calendar produces exactly this pattern, and the surrogate tests remove nearly all of it on real data. The most visible campaign, Octobre Rose, is the clearest case: its media and search peaks coincide, its standard tests are highly significant, yet its day-to-day media coverage carries almost no information about searches beyond what any year's coverage would (a weak transfer-entropy signal for coverage to searches does not survive the weekly cycle). In the terms of agenda-setting theory \cite{mccombs1972}, our results do not support a strong, day-to-day transfer of attention from the media to the public during these campaigns; both channels respond to the same calendar.
 
-\paragraph{Movember.} The only link that resists the weekly cycle and the season levels is Movember, MC $\to$ GT, detected by lsNGC. It is small, and three observations limit its reading. It disappears when the average campaign profile is subtracted from both series; the transfer function of the adjusted series has no lagged response of searches to coverage (0.01, interval $-0.10$ to $0.11$); and the linear impulse response of the raw series is negative, in line with the media peak coming about nine days after the search peak (Table~\ref{tab:peaklag}). Together these suggest that coverage carries information about searches through the shape of the campaign in each year, not through day-to-day departures from it. Whether this shape is the size of the campaign, its timing, or an interaction between the two we cannot tell; describing it (for instance with partial-dependence plots of the lsNGC model, or by relating season-level features of the two series) is the next step. With 11 seasons, the precision is limited: the 95\% intervals of the lagged response of searches to coverage (Table~\ref{tab:tf}) are about $\pm0.15$ search points per coverage point for Movember and Octobre Rose and $-0.18$ to $0.37$ for Mars Bleu, so larger lagged responses are excluded in those campaigns, but not in Dry January.
+\paragraph{Movember.} For Movember, the linear and KGC tests find that coverage predicts searches when the series are left unadjusted, but not once the weekly cycle is removed; transfer entropy finds no such link ($p=0.75$); and the linear impulse response of the raw series is negative, in line with the media peak coming about nine days after the search peak (Table~\ref{tab:peaklag}). The transfer function of the adjusted series has no lagged response of searches to coverage (0.01, interval $-0.10$ to $0.11$). In the other direction, searches precede coverage: the linear test is highly significant, transfer entropy points the same way without surviving correction (adjusted $p=0.14$), and the transfer function has a positive lagged response (0.60, interval 0.09 to 1.10) that the surrogate test does not confirm (adjusted $p=0.088$). These results are compatible with a simple description, which they do not prove: coverage follows searches and the campaign calendar rather than leading searches. With 11 seasons, the precision is limited: the 95\% intervals of the lagged response of searches to coverage (Table~\ref{tab:tf}) are about $\pm0.15$ search points per coverage point for Movember and Octobre Rose and $-0.18$ to $0.37$ for Mars Bleu, so larger lagged responses are excluded in those campaigns, but not in Dry January.
 
 \paragraph{Same-day association.} The transfer functions show a positive association on the same day for Movember, Mars Bleu and Dry January after the campaign profile, the weekly cycle and the season levels are removed, and none for Octobre Rose. A same-day correlation has no direction, and daily data cannot order two events within a day. It is what a shared event (a news item, a public figure's announcement) produces, and also what a fast mutual reaction produces. The simulations add a caution: when the timing of the campaign pulse varies from year to year, the same-day test rejects in about half the datasets without any link. Resolving the order would need data at a finer resolution (hourly Google Trends, time-stamped articles) or events whose timing is known to be unrelated to the campaign.
 
-\paragraph{Predictive, not causal.} A surrogate test removes a common driver with the same timing every year, but not one whose date changes from year to year, such as news events, celebrity announcements or local initiatives; the simulations show that no test used here, transfer functions included, can rule this out. The Movember and same-day results are therefore predictive associations beyond a fixed campaign calendar, not evidence of a causal effect of media coverage.
+\paragraph{Predictive, not causal.} A surrogate test removes a common driver with the same timing every year, but not one whose date changes from year to year, such as news events, celebrity announcements or local initiatives; the simulations show that no test used here, transfer functions included, can rule this out. The same-day associations are therefore predictive associations beyond a fixed campaign calendar, not evidence of a causal effect of media coverage.
 
-\paragraph{Limitations.} Besides the data-quality issues of Section~\ref{sec:data} (sampling noise of GT, normalisation within seasons, scope of the MC collection): (i) the KPSS test indicates a non-constant mean for four of the eight series; the within-season design and the surrogates limit, but do not remove, the influence of trends across seasons, in particular for Dry January. (ii) Queries rely on manual curation; the Dry January GT query includes general alcohol-cessation terms, and MC texts contain boilerplate (cookie banners, newsletter links; Figure~\ref{fig:kgrams}) that may add noise to the k-gram selection. (iii) Many specifications were run: three methods, two calendar-conditioning variants and five calendar adjustments for the surrogate tests, and 24 transfer-function tests. Multiple-testing corrections are applied within each family of eight tests, not across families, so a single significant cell is weak evidence. The Movember lsNGC result is the only one that repeats across variants, but its unadjusted $p$-value of 0.001, the smallest attainable with 999 surrogates, would reach 0.048 after a Bonferroni correction over the 48 tests of the main analysis; we report all specifications and base conclusions on links that are consistent across them. (iv) The nonlinear analysis truncates seasons to the shortest season of each campaign and uses lag orders up to 7 days, whereas the linear analysis selects lags up to 20 days, so effect sizes are not directly comparable between the two. (v) The surrogate and transfer-function tests are calibrated on simulated systems whose structure we chose; the simulated weekly cycle did not reproduce the influence that the real weekly cycle has on the linear and KGC tests. (vi) Each seasonal window of GT was downloaded once, and the transfer functions of Dry January rest on 43 days per season.
+\paragraph{Limitations.} Besides the data-quality issues of Section~\ref{sec:data} (sampling noise of GT, normalisation within seasons, scope of the MC collection): (i) the KPSS test indicates a non-constant mean for four of the eight series; the within-season design and the surrogates limit, but do not remove, the influence of trends across seasons, in particular for Dry January. (ii) Queries rely on manual curation; the Dry January GT query includes general alcohol-cessation terms, and MC texts contain boilerplate (cookie banners, newsletter links; Figure~\ref{fig:kgrams}) that may add noise to the k-gram selection. (iii) Many specifications were run: three methods, two calendar-conditioning variants and five calendar adjustments for the surrogate tests, and 24 transfer-function tests. Multiple-testing corrections are applied within each family of eight tests, not across families, so a single significant cell is weak evidence; we report all specifications and draw conclusions only from what holds across them, which is why we do not call any of the isolated signals of Section~\ref{sec:beyond} a result. (iv) The nonlinear analysis truncates seasons to the shortest season of each campaign and uses lag orders up to 7 days, whereas the linear analysis selects lags up to 20 days, so effect sizes are not directly comparable between the two. (v) The surrogate and transfer-function tests are calibrated on simulated systems whose structure we chose; the simulated weekly cycle did not reproduce the influence that the real weekly cycle has on the linear and KGC tests. (vi) Each seasonal window of GT was downloaded once, and the transfer functions of Dry January rest on 43 days per season. (vii) Transfer entropy uses at most three lags of each series, because nearest-neighbour estimates degrade with the dimension, and it has little power against weak lagged links (10 of 100 simulated datasets for a cumulated response of 0.3): its null results exclude strong links only.
 
 \paragraph{Scope.} The analysis describes how media coverage and search interest co-evolve during campaigns. It does not estimate the counterfactual trajectory in the absence of a campaign, nor does it measure downstream outcomes such as screening uptake.
 
 % ==================================================================
 \section{Conclusion and future work}
 % ==================================================================
-Through query construction, peak-alignment analysis, linear and nonlinear Granger tests with calendar-adjusted surrogates, and transfer functions, all checked on simulated systems where the true answer is known, we find that most of the apparent coupling between media coverage and public interest during French health campaigns reflects their shared calendar. What remains is, first, a same-day association between searches and coverage for Movember, Mars Bleu and Dry January, whose direction the daily data cannot establish; second, one small nonlinear link from coverage to searches for Movember, stable to the weekly cycle and to season levels but dependent on the campaign profile, so not a day-to-day response; and third, nothing for Octobre Rose, the campaign with the strongest standard tests. A delayed response of one series to the other, the quantity a transfer function adds to a Granger test, is established for no campaign.
+Through query construction, peak-alignment analysis, linear and nonlinear Granger tests (kernel Granger causality and transfer entropy) with calendar-adjusted surrogates, and transfer functions, all checked on simulated systems where the true answer is known, we find that most of the apparent coupling between media coverage and public interest during French health campaigns reflects their shared calendar, and in particular the average campaign profile: once it is removed, no link is found by more than one of the three Granger-type methods. What remains is, first, a same-day association between searches and coverage for Movember, Mars Bleu and Dry January, whose direction the daily data cannot establish; second, isolated signals that two methods share without a profile-free confirmation (Dry January, searches to coverage; Movember, coverage to searches, in the linear and KGC tests only without adjustment); and third, nothing for Octobre Rose, the campaign with the strongest standard tests, beyond a weak transfer-entropy signal that does not survive the weekly cycle. A delayed response of one series to the other, the quantity a transfer function adds to a Granger test, is established for no campaign.
 
-Future work will (i) use media shocks unrelated to the campaign calendar, such as news events or celebrity announcements, to identify the effect of coverage on searches; (ii) use hourly search data and time-stamped articles to order the same-day association; (iii) relate the Movember link to season-level features (size and timing of the campaign) to characterise what it carries; (iv) estimate campaign effects with an event-study design against control topics without a campaign; and (v) link search interest to downstream outcomes such as screening uptake.
+Future work will (i) use media shocks unrelated to the campaign calendar, such as news events or celebrity announcements, to identify the effect of coverage on searches; (ii) use hourly search data and time-stamped articles to order the same-day association; (iii) relate the campaign profile to season-level features (size and timing of the campaign) to characterise what it carries; (iv) estimate campaign effects with an event-study design against control topics without a campaign; and (v) link search interest to downstream outcomes such as screening uptake.
 
 % ==================================================================
 \begin{thebibliography}{99}
@@ -601,7 +601,7 @@ With AIC computed on a different sample for each lag pair, one of the two lag or
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\linewidth]{kg08_weekly_cycle}
-  \caption{Holm-adjusted surrogate $p$-values (999 surrogates) of linear Granger causality, KGC and lsNGC when the surrogate cause is another season aligned by calendar date (left; adjustment A), another season shifted by at most three days so that weekdays coincide (centre), or when the weekly cycle is first removed from both series (right; adjustment B). Shaded: $p<0.05$. In simulation with a shared weekly cycle and no link, the three procedures reject in 0--2\%, 0--7\% and 3--6\% of 100 datasets respectively. The weekday-aligned scheme gives small $p$-values for Dry January in both directions that neither other procedure reproduces; we do not rely on it.}
+  \caption{Holm-adjusted surrogate $p$-values (999 surrogates) of linear Granger causality, KGC and transfer entropy when the surrogate cause is another season aligned by calendar date (left; adjustment A), another season shifted by at most three days so that weekdays coincide (centre), or when the weekly cycle is first removed from both series (right; adjustment B). Shaded: $p<0.05$. In simulation with a shared weekly cycle and no link, the three procedures reject in 0--2\%, 0--7\% and 3--6\% of 100 datasets respectively. The weekday-aligned scheme gives small $p$-values for Dry January in both directions that neither other procedure reproduces; we do not rely on it.}
   \label{fig:weekly}
 \end{figure}
 
@@ -630,36 +630,6 @@ Octobre Rose & GT $\to$ MC & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & 1.
 \end{tabular}}
 \end{table}
 
-\begin{table}[htbp]
-\centering
-\caption{lsNGC with 10 k-means initialisations (199 surrogates each; Holm correction across the eight tests for each initialisation) when the weekly cycle is handled by weekday-aligned surrogates or by removing it from the series.}
-\label{tab:seeds-weekly}
-\footnotesize
-\setlength{\tabcolsep}{3pt}
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{lllccc}
-\toprule
-Procedure & Campaign & Direction & $\delta$ (min--max) & Surrogate $p$ (min--max) & Significant after Holm \\
-\midrule
-Weekdays aligned & Dry January & MC $\to$ GT & 0.038--0.053 & 0.005--0.050 & 1/10 \\
- & Dry January & GT $\to$ MC & 0.119--0.119 & 0.005--0.020 & 5/10 \\
- & Mars Bleu & MC $\to$ GT & 0.003--0.007 & 0.570--0.840 & 0/10 \\
- & Mars Bleu & GT $\to$ MC & 0.012--0.024 & 0.045--0.300 & 0/10 \\
- & Movember & MC $\to$ GT & 0.024--0.028 & 0.005--0.005 & 10/10 \\
- & Movember & GT $\to$ MC & 0.031--0.034 & 0.200--0.320 & 0/10 \\
- & Octobre Rose & MC $\to$ GT & 0.001--0.003 & 0.940--0.990 & 0/10 \\
- & Octobre Rose & GT $\to$ MC & 0.033--0.039 & 0.850--0.960 & 0/10 \\ \midrule
-Weekly cycle removed & Dry January & MC $\to$ GT & 0.058--0.075 & 0.035--0.075 & 0/10 \\
- & Dry January & GT $\to$ MC & 0.108--0.108 & 0.045--0.095 & 0/10 \\
- & Mars Bleu & MC $\to$ GT & 0.010--0.013 & 0.410--0.550 & 0/10 \\
- & Mars Bleu & GT $\to$ MC & 0.005--0.008 & 0.140--0.355 & 0/10 \\
- & Movember & MC $\to$ GT & 0.015--0.018 & 0.005--0.010 & 8/10 \\
- & Movember & GT $\to$ MC & 0.029--0.032 & 0.025--0.095 & 0/10 \\
- & Octobre Rose & MC $\to$ GT & 0.003--0.005 & 0.770--0.950 & 0/10 \\
- & Octobre Rose & GT $\to$ MC & 0.038--0.046 & 0.810--0.905 & 0/10 \\
-\bottomrule
-\end{tabular}}
-\end{table}
 
 \section{Nonlinear tests: simulations, lag order and surrogate distributions}\label{app:nonlinear}
 \begin{figure}[htbp]
@@ -672,7 +642,7 @@ Weekly cycle removed & Dry January & MC $\to$ GT & 0.058--0.075 & 0.035--0.075 &
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\linewidth]{kg04_main_results}
-  \caption{Adjusted p-values of linear Granger causality, KGC (squared-exponential kernel) and lsNGC, with the parametric tests of the original papers and with season-swap surrogates, without (left) and with (right) calendar conditioning. Shaded cells: $p<0.05$. $m$: lag order.}
+  \caption{Adjusted p-values of linear Granger causality, KGC (squared-exponential kernel) and transfer entropy, with the parametric tests of the original method (none for transfer entropy) and with season-swap surrogates, without (left) and with (right) calendar conditioning. Shaded cells: $p<0.05$. $m$: lag order.}
   \label{fig:main}
 \end{figure}
 
@@ -692,35 +662,38 @@ Weekly cycle removed & Dry January & MC $\to$ GT & 0.058--0.075 & 0.035--0.075 &
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{kg05_null_lsngc}
-  \caption{lsNGC, unconditional variant: observed statistic $\delta$ (red line) against its distribution over 199 season-swap surrogates, with unadjusted surrogate p-values.}
+  \includegraphics[width=\linewidth]{kg05_null_te}
+  \caption{Transfer entropy, unconditional variant: observed statistic $\delta$ (red line) against its distribution over 199 season-swap surrogates, with unadjusted surrogate p-values.}
   \label{fig:null}
 \end{figure}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\linewidth]{kg07_jackknife_delta}
-  \caption{Unconditional variant: observed statistic $\delta$ (dot) with its 95\% delete-one-season jackknife interval (line) and its chance level (mean over 199 surrogates, vertical tick), for KGC (squared-exponential kernel, left) and lsNGC (right).}
+  \caption{Unconditional variant: observed statistic $\delta$ (dot) with its 95\% delete-one-season jackknife interval (line) and its chance level (mean over 199 surrogates, vertical tick), for KGC (squared-exponential kernel, left) and transfer entropy (right, in nats).}
   \label{fig:jkdelta}
 \end{figure}
 
 \begin{table}[htbp]
 \centering
-\caption{lsNGC, unconditional variant, repeated with 10 k-means initialisations (199 surrogates each; Holm correction across the eight tests for each initialisation).}
-\label{tab:seeds}
-\small
-\begin{tabular}{llccc}
+\caption{Transfer entropy, unconditional variant, with 3, 5 and 10 neighbours in the estimator (199 surrogates each): estimate $\delta$ (nats) and Holm-adjusted surrogate $p$-value across the eight tests. Bold: $p<0.05$.}
+\label{tab:te-k}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llcccccc}
 \toprule
-Campaign & Direction & $\delta$ (min--max) & Surrogate $p$ (min--max) & Significant after Holm \\
+ & & \multicolumn{2}{c}{$k=3$} & \multicolumn{2}{c}{$k=5$} & \multicolumn{2}{c}{$k=10$} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
+Campaign & Direction & $\delta$ & $p$ & $\delta$ & $p$ & $\delta$ & $p$ \\
 \midrule
-Dry January  & MC $\to$ GT & 0.038--0.053 & 0.055--0.175 & 0/10 \\
-             & GT $\to$ MC & 0.119--0.119 & 0.035--0.090 & 0/10 \\
-Mars Bleu    & MC $\to$ GT & 0.003--0.007 & 0.855--0.985 & 0/10 \\
-             & GT $\to$ MC & 0.012--0.024 & 0.005--0.060 & 5/10 \\
-Movember     & MC $\to$ GT & 0.024--0.028 & 0.005--0.005 & 10/10 \\
-             & GT $\to$ MC & 0.031--0.034 & 0.010--0.035 & 0/10 \\
-Octobre Rose & MC $\to$ GT & 0.001--0.003 & 0.960--1.000 & 0/10 \\
-             & GT $\to$ MC & 0.033--0.039 & 0.865--0.945 & 0/10 \\
+Dry January & GT $\to$ MC & 0.123 & 0.24 & 0.103 & 0.24 & 0.104 & \textbf{0.040} \\
+ & MC $\to$ GT & 0.007 & 1.00 & 0.019 & 0.57 & 0.011 & 1.00 \\
+Mars Bleu & GT $\to$ MC & 0.027 & 0.45 & 0.019 & 0.47 & 0.014 & 0.58 \\
+ & MC $\to$ GT & -0.014 & 1.00 & -0.015 & 1.00 & -0.003 & 1.00 \\
+Movember & GT $\to$ MC & 0.047 & 0.10 & 0.028 & 0.14 & 0.022 & 0.21 \\
+ & MC $\to$ GT & -0.010 & 1.00 & -0.007 & 1.00 & -0.006 & 1.00 \\
+Octobre Rose & GT $\to$ MC & 0.020 & 1.00 & 0.032 & 0.48 & 0.017 & 1.00 \\
+ & MC $\to$ GT & 0.054 & \textbf{0.040} & 0.036 & 0.080 & 0.014 & 0.21 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -728,7 +701,7 @@ Octobre Rose & MC $\to$ GT & 0.001--0.003 & 0.960--1.000 & 0/10 \\
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\linewidth]{kg06_lag_sensitivity}
-  \caption{Unadjusted surrogate p-values of KGC (squared-exponential kernel, left) and lsNGC (right) by lag order $m$, unconditional variant, with 39 surrogates (smallest attainable value 0.025). Shaded cells: $p<0.05$.}
+  \caption{Unadjusted surrogate p-values of KGC (squared-exponential kernel, left) and transfer entropy (right) by lag order $m$ (transfer entropy uses at most 3 lags, so the columns $m=3,5,7$ differ only by the surrogates drawn), unconditional variant, with 39 surrogates (smallest attainable value 0.025). Shaded cells: $p<0.05$.}
   \label{fig:lagsens}
 \end{figure}
 

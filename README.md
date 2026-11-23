@@ -27,7 +27,7 @@ media salience. The analysis:
 | [`01_query_building_and_data_collection`](notebooks/01_query_building_and_data_collection.ipynb) | GT snowball query discovery, MC article texts and k-grams, monthly series, daily campaign windows | §2 | no (APIs) |
 | [`02_visualisation_and_peak_timing`](notebooks/02_visualisation_and_peak_timing.ipynb) | Daily windows, seasons aligned on the GT peak, lag between MC and GT peaks | §3.1, §4.1 | yes |
 | [`03_granger_analysis`](notebooks/03_granger_analysis.ipynb) | Linear Granger causality with within-season lags: AIC lag selection, F-tests, LOYO, coefficients, jackknife intervals, impulse responses with bootstrap bands, sensitivity to the specification, season fixed effects | §4.3–4.4, App. C–D | yes |
-| [`04_nonlinear_kernel_granger`](notebooks/04_nonlinear_kernel_granger.ipynb) | Nonlinear Granger causality (KGC, lsNGC), season-swap surrogates, validation on 100 simulated datasets per scenario, jackknife intervals, robustness to the k-means initialisation, five calendar adjustments (weekly cycle, season level, campaign profile) | §3.4, §4.5–4.6, App. F–G | yes* |
+| [`04_nonlinear_kernel_granger`](notebooks/04_nonlinear_kernel_granger.ipynb) | Nonlinear Granger causality (KGC and transfer entropy), season-swap surrogates, validation on 100 simulated datasets per scenario, power of transfer entropy on linear lagged links, jackknife intervals, robustness to the number of neighbours, five calendar adjustments (weekly cycle, season level, campaign profile) | §3.4, §4.5–4.6, App. F–G | yes* |
 | [`05_report_figures`](notebooks/05_report_figures.ipynb) | Monthly GT vs MC series, snowball rounds, top k-grams, drawn from your data files | Figs. 1, 12, 13 | yes*** |
 | [`06_transfer_functions`](notebooks/06_transfer_functions.ipynb) | Calendar removal, pre-whitened cross-correlations, transfer functions (distributed lag, delay + decay), jackknife intervals, season-swap tests, validation on simulated systems, coherence and phase | §3.5, §4.7, App. E | yes** |
 
@@ -48,8 +48,9 @@ The shared code is in `src/phc/`:
 * `collect.py`: Google Trends and MediaCloud collection, k-grams;
 * `granger.py`: lag matrices, AIC grid, F-test, LOYO, coefficients, stationarity,
   season bootstrap, impulse responses;
-* `kernel_granger.py`: KGC and lsNGC (used in notebook 04), KPCR and GPSIC (implemented,
-  not used), within-season lag design, season-swap surrogates, jackknife;
+* `kernel_granger.py`: KGC (used in notebook 04), KPCR and GPSIC (implemented, not used),
+  within-season lag design, season-swap surrogates, jackknife;
+* `transfer_entropy.py`: nearest-neighbour (KSG, Frenzel-Pompe) transfer entropy;
 * `transfer.py`: calendar removal, pre-whitening and cross-correlation, transfer-function
   fits (distributed lag, delay + decay), residual checks, jackknife, season-swap tests,
   cross-spectrum;
@@ -98,18 +99,19 @@ Numbers refer to the report (`report/main.tex`); all tables are in `results/tabl
 * **Standard Granger tests find links almost everywhere** (7 of 8 campaign × direction
   pairs), but simulations show that a shared campaign calendar alone produces this: with a
   common driver of fixed timing the standard tests report spurious links in 39–100% of
-  100 datasets, season-swap surrogates in 4–7%. A common driver whose timing changes from
-  year to year still fools every test (32–94% with surrogates).
+  100 datasets, season-swap surrogates in 2–7%. A common driver whose timing changes from
+  year to year still fools the surrogate tests (linear 48–94%, KGC 32–77%), less so
+  transfer entropy (11–38%).
 * **Linear Granger** (within-season lags): past searches predict press coverage for Mars
   Bleu, Movember and Octobre Rose; past coverage is significant for searches in three
   campaigns with tiny gains. Season fixed effects change nothing.
-* **Nonlinear, against surrogates**: one link is stable to the weekly cycle and to season
-  levels, **Movember, coverage → searches** (lsNGC, Holm-adjusted p = 0.008 with 999
-  surrogates; 2.7% of the variance left by past searches, 1.8% once the weekly cycle is
-  removed, against 0.6% for surrogates). It **vanishes when the average campaign profile is
-  subtracted**, and the transfer function of the adjusted series shows no lagged response,
-  so it is not a day-to-day influence. Mars Bleu searches → coverage, significant in
-  some variants, is not robust. Octobre Rose shows no link in any variant.
+* **Nonlinear (KGC, transfer entropy), against surrogates**: almost nothing survives
+  correction. Pairs significant for two methods under one calendar adjustment (Movember
+  coverage → searches, Mars Bleu searches → coverage, Dry January searches → coverage) all
+  vanish when the average campaign profile is subtracted (1 of 24 tests significant with
+  everything removed, not reproduced by the other methods). Transfer entropy does not
+  reproduce the Movember coverage → searches link found by lsNGC in an earlier version
+  (removed). Octobre Rose shows no link with the linear and kernel tests.
 * **Transfer functions** (calendar, weekday and season level removed): searches and
   coverage are associated **on the same day** for Movember, Mars Bleu and Dry January
   (positive, delay 0, half-life under 0.6 day), not at all for Octobre Rose. A delayed
