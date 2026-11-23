@@ -40,13 +40,14 @@ def test_weekday_aligned_swap():
 def test_multiple_testing_corrections():
     p = np.array([0.01, 0.04, 0.03, 0.005])
     assert np.allclose(K.holm(p), [0.03, 0.06, 0.06, 0.02])
-    assert np.allclose(K.benjamini_hochberg(p), [0.02, 0.04, 0.04, 0.02])
     assert K.surrogate_pvalue(1.0, np.zeros(199)) == pytest.approx(1 / 200)
 
 
 def test_nonlinear_link_is_detected_and_direction_is_right():
     df = S.nonlinear_mc_to_gt(seed=1)
-    fwd = K.run_tests(df, "gt", "mc", m=1, n_surrogates=39, seed=0, methods=("lsngc",))
-    back = K.run_tests(df, "mc", "gt", m=1, n_surrogates=39, seed=0, methods=("lsngc",))
-    assert fwd["lsngc_p_surr"] == pytest.approx(1 / 40)
-    assert fwd["lsngc_delta"] > 5 * back["lsngc_delta"]
+    for key in ("kgc_se", "te"):
+        fwd = K.run_tests(df, "gt", "mc", m=1, n_surrogates=39, seed=0, methods=(key,))
+        back = K.run_tests(df, "mc", "gt", m=1, n_surrogates=39, seed=0, methods=(key,))
+        assert fwd[f"{key}_p_surr"] == pytest.approx(1 / 40)
+        assert fwd[f"{key}_delta"] > 3 * abs(back[f"{key}_delta"])
+        assert back[f"{key}_p_surr"] > 0.05

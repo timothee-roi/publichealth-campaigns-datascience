@@ -1,13 +1,8 @@
-"""Nonlinear (kernel) Granger causality between two daily series.
+"""Nonlinear Granger causality between two daily series: KGC and transfer entropy.
 
-Notebook 04 uses KGC and lsNGC (``run_tests``). KPCR and GPSIC are also implemented
-and tested here, but not used in the notebook.
-
-lsNGC  Large-scale nonlinear Granger causality (Wismuller et al. 2021, Sci. Rep. 11,
-       8516), as described by Murphy & Benavoli (2026), Sec. 2.1.3: normalised Gaussian
-       RBF features around k-means centres (c_f = 25 for the effect's past, c_g = 5 for
-       the cause's past), additive regression, F-test; the false discovery rate is
-       controlled across tests.
+Notebook 04 uses KGC (linear and squared-exponential kernels) and transfer entropy
+(``run_tests``; the estimator is in ``transfer_entropy.py``). KPCR and GPSIC are also
+implemented and tested here, but not used in the notebook.
 
 Kernel methods compared by Murphy & Benavoli (2026),
 "Constraint- and Score-Based Nonlinear Granger Causality Discovery with Kernels",
@@ -57,6 +52,8 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 from scipy import linalg, optimize, stats
+
+from .transfer_entropy import KSGTE
 
 MU = 1e-6            # eigenvalue filter (paper)
 ALPHA = 0.05
@@ -245,69 +242,6 @@ class KGC:
 
 
 # ---------------------------------------------------------------------------
-# lsNGC (Wismuller et al. 2021), as described in Murphy & Benavoli (2026), Sec. 2.1.3
-# ---------------------------------------------------------------------------
-def grbf_features(X: np.ndarray, n_clusters: int, seed: int = 0) -> np.ndarray:
-    """Normalised Gaussian RBF activations around k-means centres.
-
-    f_j(x) = exp(-|x - u_j|^2 / l^2) / sum_k exp(-|x - u_k|^2 / l^2), with l the mean
-    distance between the cluster centres.
-    """
-    from sklearn.cluster import KMeans
-    km = KMeans(n_clusters=n_clusters, n_init=10, random_state=seed).fit(X)
-    U = km.cluster_centers_
-    dc = np.sqrt(_sqdist(U))
-    l = dc[np.triu_indices_from(dc, 1)].mean()
-    A = -_sqdist(X, U) / l ** 2
-    A = np.exp(A - A.max(1, keepdims=True))          # stable softmax
-    return A / A.sum(1, keepdims=True)
-
-
-class LSNGC:
-    """Large-scale nonlinear Granger causality (bivariate case).
-
-    Restricted model: y ~ f(X) (c_f = 25 clusters on the effect's past [+ calendar]);
-    unrestricted: y ~ [f(X), g(X_a)] (c_g = 5 clusters on the cause's past), fitted by
-    least squares; F-test on the added block. The activations of each block sum to 1,
-    so the intercept is implicit and the unrestricted design has rank c_f + c_g - 1;
-    the F-test uses these actual ranks.
-    """
-
-    def __init__(self, y, X, c_f=25, c_g=5, seed=0):
-        self.y, self.c_g, self.seed = y, c_g, seed
-        self.F_X = grbf_features(X, c_f, seed)
-        self.n = len(y)
-        self.p_r = np.linalg.matrix_rank(self.F_X)
-        b, *_ = np.linalg.lstsq(self.F_X, y, rcond=None)
-        r = y - self.F_X @ b
-        self.ssr_r = float(r @ r)
-
-    def stat(self, B) -> dict:
-        Zf = np.hstack([self.F_X, grbf_features(B, self.c_g, self.seed)])
-        p_u = np.linalg.matrix_rank(Zf)
-        b, *_ = np.linalg.lstsq(Zf, self.y, rcond=None)
-        r = self.y - Zf @ b
-        ssr_u = float(r @ r)
-        F = ((self.ssr_r - ssr_u) / (p_u - self.p_r)) / (ssr_u / (self.n - p_u))
-        return {"delta": 1 - ssr_u / self.ssr_r, "F": F, "p_r": int(self.p_r), "p_u": int(p_u),
-                "p_value": float(stats.f.sf(F, p_u - self.p_r, self.n - p_u))}
-
-
-def benjamini_hochberg(pvals) -> np.ndarray:
-    """Benjamini-Hochberg adjusted p-values (false discovery rate)."""
-    p = np.asarray(pvals, float)
-    n = len(p)
-    order = np.argsort(p)
-    adj = np.empty(n)
-    running = 1.0
-    for rank in range(n - 1, -1, -1):
-        i = order[rank]
-        running = min(running, p[i] * n / (rank + 1))
-        adj[i] = running
-    return adj
-
-
-# ---------------------------------------------------------------------------
 # KPCR (Murphy & Benavoli 2026) -- implemented and tested, not used in notebook 04
 # ---------------------------------------------------------------------------
 class KPCR:
@@ -429,17 +363,42 @@ def select_lag(df, effect, cause, lags=(1, 2, 3, 5, 7), conditional=False,
     return pd.Series(out, name="cv_mse")
 
 
+TE_MAX_LAG = 3   # transfer entropy uses at most this many lags of each series (dimension 2m)
+TE_K = 5         # neighbours in the KSG estimator
+
+
+def te_design(d: Design, X: np.ndarray, conditional: bool):
+    """Inputs of the transfer entropy: first min(m, TE_MAX_LAG) lags of the effect (+ calendar)
+    and of the cause. Nearest-neighbour estimates degrade quickly with the dimension."""
+    mt = min(d.m, TE_MAX_LAG)
+    own = d.own[:, :mt]
+    Xt = np.hstack([own, d.calendar]) if conditional else own
+    return Xt, mt
+
+
 def run_tests(df, effect, cause, m, conditional=False, start=None, n_surrogates=199,
-              seed=0, methods=("kgc_lin", "kgc_se", "lsngc"), align_weekday=False) -> dict:
-    """KGC (linear and SE kernels) and lsNGC for the direction cause -> effect, with the
-    paper's parametric tests and season-swap surrogate p-values."""
+              seed=0, methods=("kgc_lin", "kgc_se", "te"), align_weekday=False,
+              te_k: int = TE_K) -> dict:
+    """KGC (linear and SE kernels) and transfer entropy for the direction cause -> effect.
+
+    KGC has the paper's parametric test (``*_p_param``) and season-swap surrogate p-values;
+    transfer entropy has no parametric test and is judged by surrogates only
+    (``te_p_param`` is NaN).
+    """
     d = make_design(df, effect, cause, m, start=start)
     X = d.X(conditional)
     perms = derangements(d.cause_panel.shape[0], n_surrogates, np.random.default_rng(seed))
     surr = [d.cause_from_panel(d.swapped_panel(p, align_weekday)) for p in perms]
     out = {"m": m, "n": len(d.y), "conditional": conditional, "nulls": {}}
     for key in methods:
-        if key.startswith("kgc"):
+        if key == "te":
+            Xt, mt = te_design(d, X, conditional)
+            test = KSGTE(d.y, Xt, k=te_k, seed=seed)
+            cause_in = d.cause[:, :mt]
+            surr_in = [B[:, :mt] for B in surr]
+            o = test.stat(cause_in)
+            out.update({"te_m": mt, "te_p_param": np.nan})
+        else:
             if key == "kgc_lin":
                 test = KGC(d.y, X, "poly", 1)
             else:
@@ -447,12 +406,8 @@ def run_tests(df, effect, cause, m, conditional=False, start=None, n_surrogates=
             o = test.stat(d.cause)
             out.update({f"{key}_delta_f": o["delta_f"], f"{key}_n_r": o["n_r"],
                         f"{key}_n_f": o["n_f"], f"{key}_p_param": o["p_min_bonf"]})
-        else:
-            test = LSNGC(d.y, X, seed=seed)
-            o = test.stat(d.cause)
-            out.update({f"{key}_F": o["F"], f"{key}_p_r": o["p_r"], f"{key}_p_u": o["p_u"],
-                        f"{key}_p_param": o["p_value"]})
-        null = np.array([test.stat(B)["delta"] for B in surr])
+            cause_in, surr_in = d.cause, surr
+        null = np.array([test.stat(B)["delta"] for B in surr_in])
         out.update({f"{key}_delta": o["delta"], f"{key}_null_mean": float(null.mean()),
                     f"{key}_p_surr": surrogate_pvalue(o["delta"], null)})
         out["nulls"][key] = (o["delta"], null)
@@ -478,8 +433,9 @@ def delta_stat(df, effect, cause, m, method, conditional=False, start=None, seed
         return KGC(d.y, X, "poly", 1).stat(d.cause)["delta"]
     if method == "kgc_se":
         return KGC(d.y, X, "se", se_lengthscale(X.shape[1] + d.cause.shape[1])).stat(d.cause)["delta"]
-    if method == "lsngc":
-        return LSNGC(d.y, X, seed=seed).stat(d.cause)["delta"]
+    if method == "te":
+        Xt, mt = te_design(d, X, conditional)
+        return KSGTE(d.y, Xt, k=TE_K, seed=seed).stat(d.cause[:, :mt])["delta"]
     raise ValueError(method)
 
 
