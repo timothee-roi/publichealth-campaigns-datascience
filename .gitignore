@@ -16,3 +16,6 @@ report/*.log
 report/*.out
 report/*.pdf
 report/*.toc
+
+# JMIR build intermediates
+report/jmir/build/
